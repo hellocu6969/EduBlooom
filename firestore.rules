@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Students collection: Public read for garden display and leaderboards
+    match /students/{studentId} {
+      allow read: if true;
+      allow write: if isValidId(studentId);
+    }
+
+    // Teams collection
+    match /teams/{teamId} {
+      allow read: if true;
+      allow write: if isValidId(teamId);
+    }
+
+    // Positive actions catalogue
+    match /positiveActions/{actionId} {
+      allow read: if true;
+      allow write: if isValidId(actionId);
+    }
+
+    // Transactions collection: point awards/deductions
+    match /transactions/{transactionId} {
+      allow read: if true;
+      allow create: if isValidId(transactionId);
+      allow update, delete: if isValidId(transactionId);
+    }
+
+    // Audit logs collection
+    match /auditLogs/{logId} {
+      allow read: if true;
+      allow create: if isValidId(logId);
+      allow update, delete: if isValidId(logId);
+    }
+
+    // Settings collection
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isValidId(settingId);
+    }
+
+    // Connection test collection
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
+    // Default deny for unmatched documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

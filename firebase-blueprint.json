@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Information about a student in the class bloom garden",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "name": { "type": "string" },
+        "teamId": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "team_leader", "class_president"] },
+        "totalPoints": { "type": "number" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"] },
+        "avatarSeed": { "type": "string" },
+        "notes": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "code", "name", "teamId", "role", "totalPoints"]
+    },
+    "Team": {
+      "title": "Team",
+      "description": "Group or team in class",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slogan": { "type": "string" },
+        "color": { "type": "string" },
+        "leaderStudentId": { "type": "string" },
+        "totalPoints": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "color"]
+    },
+    "PositiveAction": {
+      "title": "PositiveAction",
+      "description": "Positive and deduction reward criteria",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "points": { "type": "number" },
+        "category": { "type": "string" },
+        "requiresApproval": { "type": "boolean" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["id", "name", "points", "category", "isActive"]
+    },
+    "PointTransaction": {
+      "title": "PointTransaction",
+      "description": "History of point awards and deductions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "teamId": { "type": "string" },
+        "actionId": { "type": "string" },
+        "points": { "type": "number" },
+        "reason": { "type": "string" },
+        "notes": { "type": "string" },
+        "performerId": { "type": "string" },
+        "performerName": { "type": "string" },
+        "performerRole": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "evidenceUrl": { "type": "string" },
+        "approved": { "type": "boolean" }
+      },
+      "required": ["id", "studentId", "points", "reason", "performerName", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Administrative changes and deletion audit logs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "action": { "type": "string" },
+        "targetType": { "type": "string" },
+        "targetId": { "type": "string" },
+        "performerId": { "type": "string" },
+        "performerName": { "type": "string" },
+        "performerRole": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "details": { "type": "string" },
+        "beforeData": { "type": "string" },
+        "afterData": { "type": "string" }
+      },
+      "required": ["id", "action", "performerName", "timestamp"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Configuration settings for class bloom garden",
+      "type": "object",
+      "properties": {
+        "className": { "type": "string" },
+        "academicYear": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "teacherName": { "type": "string" },
+        "allowStudentSelfReflection": { "type": "boolean" },
+        "autoApproveMonitorPoints": { "type": "boolean" },
+        "maxDailyPointsPerStudent": { "type": "number" },
+        "celebrationThreshold": { "type": "number" }
+      },
+      "required": ["className", "teacherName"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "#/entities/Student",
+      "description": "Student documents with points and status"
+    },
+    "/teams/{teamId}": {
+      "schema": "#/entities/Team",
+      "description": "Class teams and calculated total points"
+    },
+    "/positiveActions/{actionId}": {
+      "schema": "#/entities/PositiveAction",
+      "description": "Reward and deduction criteria action items"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "#/entities/PointTransaction",
+      "description": "Point award and deduction transactions log"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "#/entities/AuditLog",
+      "description": "Audit trails for adjustments and administrative changes"
+    },
+    "/settings/{settingId}": {
+      "schema": "#/entities/AppSettings",
+      "description": "Classroom application global settings"
+    }
+  }
+}
