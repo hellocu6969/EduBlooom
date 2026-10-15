@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AuthSession, Student } from '../types';
-import { X, Shield, Users, Key, AlertCircle, CheckCircle2, Lock } from 'lucide-react';
+import { X, Shield, Users, AlertCircle, Lock } from 'lucide-react';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -15,10 +15,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 }) => {
   const [tab, setTab] = useState<'teacher' | 'staff'>('teacher');
 
-  // Teacher fields
   const [teacherPassword, setTeacherPassword] = useState('');
-
-  // Staff fields
   const [selectedStaffCode, setSelectedStaffCode] = useState(staffList[0]?.code || '');
   const [staffPin, setStaffPin] = useState('');
 
@@ -31,6 +28,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setErrorMsg('Vui lòng nhập mật khẩu quản trị.');
       return;
     }
+
     setLoading(true);
     setErrorMsg(null);
 
@@ -41,9 +39,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         body: JSON.stringify({ password: teacherPassword }),
       });
       const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data.error || 'Mật khẩu chưa chính xác.');
       }
+
       onLoginSuccess(data);
     } catch (err: any) {
       setErrorMsg(err.message || 'Lỗi đăng nhập.');
@@ -58,6 +58,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setErrorMsg('Vui lòng chọn cán sự và nhập mã PIN.');
       return;
     }
+
     setLoading(true);
     setErrorMsg(null);
 
@@ -71,9 +72,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         }),
       });
       const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data.error || 'Mã PIN chưa chính xác.');
       }
+
       onLoginSuccess(data);
     } catch (err: any) {
       setErrorMsg(err.message || 'Lỗi đăng nhập cán sự.');
@@ -85,26 +88,25 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-emerald-100 flex flex-col relative">
-        {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
           className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition"
+          aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Header */}
         <div className="text-center mb-6">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto shadow-md mb-2">
             <Lock className="w-6 h-6" />
           </div>
           <h3 className="text-xl font-bold text-slate-900">Đăng Nhập Quản Lý</h3>
           <p className="text-xs text-slate-500 mt-1">
-            Gieo mầm yêu thương & Ghi nhận việc tốt A11K65
+            Gieo mầm yêu thương &amp; Ghi nhận việc tốt A11K65
           </p>
         </div>
 
-        {/* Tab Switcher */}
         <div className="flex p-1 bg-slate-100 rounded-2xl mb-6">
           <button
             type="button"
@@ -146,7 +148,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </div>
         )}
 
-        {/* Option A: Teacher Login */}
         {tab === 'teacher' && (
           <form onSubmit={handleTeacherSubmit} className="space-y-4">
             <div>
@@ -163,7 +164,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   className="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
                 />
               </div>
-            
             </div>
 
             <button
@@ -176,13 +176,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </form>
         )}
 
-        {/* Option B: Staff Login */}
         {tab === 'staff' && (
           <form onSubmit={handleStaffSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Chọn tên hoặc mã cán sự:
               </label>
+
               {staffList.length === 0 ? (
                 <div className="p-3 bg-amber-50 rounded-xl text-xs text-amber-800">
                   Chưa có ban cán sự nào được thiết lập mã PIN.
@@ -214,7 +214,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 placeholder="Nhập mã PIN do cô Hằng cấp"
                 className="w-full p-3 text-sm font-mono tracking-widest text-center bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
               />
-              
             </div>
 
             <button
