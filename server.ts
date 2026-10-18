@@ -1009,13 +1009,19 @@ app.post('/api/transactions/award', authenticate, (req: Request, res: Response) 
   writeDB(db);
   syncTransactionToFirestore(newTx, targetStudent);
 
+  const negativeMessage = action.points < 0
+    ? `Cô Bùi Hằng đã nhắc nhở và trừ ${Math.abs(action.points)} điểm cho ${targetStudent.name} vì hành vi chưa tốt. Hãy rèn luyện thêm trong lần sau.`
+    : `Một việc tốt đã được ghi nhận! Mầm xanh A11K65 của ${targetStudent.name} vừa lớn thêm rồi! (+${action.points} điểm)`;
+
   res.json({
     success: true,
     transaction: newTx,
     isPending,
     message: isPending
-      ? 'Hành động đạt thành tích nổi bật cần cô Bùi Hằng duyệt trước khi cộng điểm.'
-      : `Một việc tốt đã được ghi nhận! Mầm xanh A11K65 của ${targetStudent.name} vừa lớn thêm rồi! (+${action.points} điểm)`,
+      ? action.points < 0
+        ? 'Hành động chưa tốt này cần cô Bùi Hằng duyệt trước khi thực hiện trừ điểm.'
+        : 'Hành động đạt thành tích nổi bật cần cô Bùi Hằng duyệt trước khi cộng điểm.'
+      : negativeMessage,
     newTotalPoints: targetStudent.totalPoints,
   });
 });

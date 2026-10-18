@@ -44,7 +44,7 @@
       "role": "class_president",
       "isArchived": false,
       "teamId": "team-4",
-      "totalPoints": 12
+      "totalPoints": 11
     },
     {
       "id": "std-2",
@@ -931,6 +931,22 @@
     }
   ],
   "transactions": [
+    {
+      "id": "tx-1792343748327-524",
+      "studentId": "std-1",
+      "studentName": "Trần Thị Linh",
+      "teamIdAtTime": "team-4",
+      "teamNameAtTime": "Tổ 4 (Future Leaders)",
+      "awardedByName": "Cô Bùi Hằng",
+      "awardedByRole": "teacher",
+      "actionId": "act-m1",
+      "actionName": "Chưa chuẩn bị bài / Quên đồ dùng học tập",
+      "points": -1,
+      "note": "",
+      "status": "approved",
+      "createdAt": "2026-10-18T17:15:48.327Z",
+      "approvedAt": "2026-10-18T17:15:48.327Z"
+    },
     {
       "id": "tx-1792031051386-424",
       "studentId": "std-2",

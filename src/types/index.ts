@@ -10,6 +10,7 @@ export interface Student {
   totalPoints: number;
   avatarSeed?: string;
   gender?: 'male' | 'female' | 'other';
+  avatarUrl?: string | null;
   notes?: string;
   isArchived?: boolean;
   hasPin?: boolean; // indicator if staff has set a PIN

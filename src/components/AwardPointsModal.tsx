@@ -58,6 +58,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
     isPending: boolean;
   } | null>(null);
 
+  const isPositiveMode = pointMode === 'positive';
   const selectedStudent = eligibleStudents.find((s) => s.id === selectedStudentId);
   const selectedAction = actions.find((a) => a.id === selectedActionId);
   const selectedStudentTeam = teams.find((t) => t.id === selectedStudent?.teamId);
@@ -104,8 +105,13 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
         });
       }
 
+      const resolvedMessage =
+        selectedAction && selectedAction.points < 0
+          ? `Cô Bùi Hằng đã nhắc nhở và trừ ${Math.abs(selectedAction.points)} điểm cho ${selectedStudent?.name || 'học sinh'} vì hành vi chưa tốt. Hãy rèn luyện thêm trong lần sau.`
+          : data.message;
+
       setSuccessInfo({
-        message: data.message,
+        message: resolvedMessage,
         studentName: selectedStudent?.name || '',
         points: selectedAction?.points || 0,
         isPending: data.isPending,
@@ -150,13 +156,15 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              Gieo Mầm Yêu Thương
+              {isPositiveMode ? 'Gieo Mầm Yêu Thương' : 'Nhắc Nhở & Trừ Điểm'}
               <Sparkles className="w-4 h-4 text-amber-500" />
             </h3>
             <p className="text-xs text-slate-500">
-              {session.role === 'teacher' && 'Cô Bùi Hằng ghi nhận hành động tốt cho học sinh'}
-              {session.role === 'class_president' && 'Lớp trưởng ghi nhận nỗ lực của các tổ trưởng'}
-              {session.role === 'team_leader' && 'Tổ trưởng ghi nhận việc tốt của thành viên trong tổ'}
+              {isPositiveMode
+                ? session.role === 'teacher' && 'Cô Bùi Hằng ghi nhận hành động tốt cho học sinh'
+                : 'Cô Bùi Hằng phạt học sinh thực hiện chưa tốt'}
+              {session.role === 'class_president' && isPositiveMode && 'Lớp trưởng ghi nhận nỗ lực của các tổ trưởng'}
+              {session.role === 'team_leader' && isPositiveMode && 'Tổ trưởng ghi nhận việc tốt của thành viên trong tổ'}
             </p>
           </div>
         </div>
@@ -172,7 +180,9 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
               <h4 className="text-lg font-bold text-slate-900">
                 {successInfo.isPending
                   ? 'Đã gửi ghi nhận thành công!'
-                  : 'Gieo mầm thành công! 🌱'}
+                  : successInfo.points >= 0
+                    ? 'Gieo mầm thành công! 🌱'
+                    : 'Trừ điểm thành công! ⚠️'}
               </h4>
               <p className="text-xs text-slate-600 mt-2 max-w-sm mx-auto leading-relaxed">
                 {successInfo.message}
@@ -180,16 +190,20 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
             </div>
 
             {selectedStudent && (
-              <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 flex items-center justify-center gap-4 max-w-sm mx-auto">
+              <div className={`p-4 rounded-2xl border max-w-sm mx-auto flex items-center justify-center gap-4 ${successInfo.points >= 0 ? 'bg-emerald-50/60 border-emerald-100' : 'bg-amber-50/70 border-amber-200'}`}>
                 <PlantIllustration
                   level={getPlantStage(selectedStudent.totalPoints + (successInfo.isPending ? 0 : successInfo.points)).level}
                   className="w-16 h-16"
-                  isWatering={true}
+                  isWatering={successInfo.points >= 0}
                 />
                 <div className="text-left">
                   <div className="text-xs font-bold text-slate-900">{selectedStudent.name}</div>
-                  <div className="text-xs text-emerald-700 font-semibold">
-                    {successInfo.isPending ? 'Đang chờ cô Hằng duyệt' : `+${successInfo.points} điểm tích cực`}
+                  <div className={`text-xs font-semibold ${successInfo.points >= 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                    {successInfo.isPending
+                      ? 'Đang chờ cô Hằng duyệt'
+                      : successInfo.points >= 0
+                        ? `+${successInfo.points} điểm tích cực`
+                        : `${successInfo.points} điểm nhắc nhở`}
                   </div>
                 </div>
               </div>
@@ -243,7 +257,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
             {/* Bước 1: Chọn Học Sinh */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Bước 1: Chọn học sinh được ghi nhận
+                {isPositiveMode ? 'Bước 1: Chọn học sinh được ghi nhận' : 'Bước 1: Chọn học sinh cần nhắc nhở'}
               </label>
               {eligibleStudents.length === 0 ? (
                 <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
@@ -292,7 +306,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
             {/* Bước 2: Chọn Lý Do */}
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-                <span>Bước 2: Chọn lý do {pointMode === 'positive' ? 'khen thưởng' : 'nhắc nhở'}</span>
+                <span>Bước 2: Chọn lý do {isPositiveMode ? 'khen thưởng' : 'nhắc nhở'}</span>
                 <span className="text-[11px] text-slate-400 font-normal">
                   ({filteredActions.length} nội dung)
                 </span>
