@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState, useEffect, useMemo } from 'react';
-=======
 import React, { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react';
->>>>>>> 1a4b379 (3)
 import {
   Student,
   Team,
@@ -16,40 +12,19 @@ import {
 import { Banner } from './components/Banner';
 import { CollectiveTree } from './components/CollectiveTree';
 import { StudentCard } from './components/StudentCard';
-<<<<<<< HEAD
-import { StudentDetailModal } from './components/StudentDetailModal';
-import { AwardPointsModal } from './components/AwardPointsModal';
-import { LoginModal } from './components/LoginModal';
-import { TeacherDashboard } from './components/TeacherDashboard';
-import { StaffDashboard } from './components/StaffDashboard';
-import { AchievementsSection } from './components/AchievementsSection';
-import { BannerModal } from './components/BannerModal';
-import { PWAInstallButton } from './components/PWAInstallButton';
-import { OfflineIndicator } from './components/OfflineIndicator';
-import { ActivityHistoryPage } from './components/ActivityHistoryPage';
-import { LeaderboardPage } from './components/LeaderboardPage';
-import { SevenDaysStatsPage } from './components/SevenDaysStatsPage';
-import { MonthlyStatsPage } from './components/MonthlyStatsPage';
-import { TeamStatsPage } from './components/TeamStatsPage';
-import { PLANT_STAGES, getPlantStage } from './utils/plantLevels';
-=======
 import { LoginModal } from './components/LoginModal';
 import { GardenFeaturesPage } from './components/GardenFeaturesPage';
 import { PWAInstallButton } from './components/PWAInstallButton';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { PLANT_STAGES, getPlantStage } from './utils/plantLevels';
 import { formatSignedPoints } from './utils/formatPoints';
->>>>>>> 1a4b379 (3)
 import {
   Sprout,
   Users,
   Search,
   Filter,
   Shield,
-<<<<<<< HEAD
-=======
   LogIn,
->>>>>>> 1a4b379 (3)
   LogOut,
   Sparkles,
   Heart,
@@ -66,11 +41,6 @@ import {
   Zap,
   Radio,
   X,
-<<<<<<< HEAD
-} from 'lucide-react';
-import { subscribeToStudents, subscribeToTransactions, subscribeToTeams } from './services/firestoreSync';
-import { testConnection } from './firebase';
-=======
   Moon,
   Sun,
 } from 'lucide-react';
@@ -108,7 +78,6 @@ const MonthlyStatsPage = lazy(() =>
 const TeamStatsPage = lazy(() =>
   import('./components/TeamStatsPage').then((module) => ({ default: module.TeamStatsPage }))
 );
->>>>>>> 1a4b379 (3)
 
 export type AppView =
   | 'garden'
@@ -117,11 +86,6 @@ export type AppView =
   | 'stats7days'
   | 'monthly'
   | 'teamStats'
-<<<<<<< HEAD
-  | 'admin';
-
-export default function App() {
-=======
   | 'community'
   | 'admin';
 
@@ -191,7 +155,6 @@ export default function App() {
   };
   const currentSeason = seasonalDetails[getCurrentSeasonIndex()];
 
->>>>>>> 1a4b379 (3)
   // Main Data States
   const [students, setStudents] = useState<Student[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -205,21 +168,6 @@ export default function App() {
 
   // Authentication State
   const [session, setSession] = useState<AuthSession | null>(() => {
-<<<<<<< HEAD
-    const saved = localStorage.getItem('bloom_session');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  });
-
-  // Navigation View State
-  const [currentView, setCurrentView] = useState<AppView>('garden');
-=======
     try {
       const saved = localStorage.getItem('bloom_session');
       if (saved) {
@@ -235,17 +183,12 @@ export default function App() {
   // Navigation View State
   const [currentView] = useState<AppView>(getViewFromLocation);
   const setCurrentView = (view: AppView) => window.location.assign(viewPaths[view]);
->>>>>>> 1a4b379 (3)
 
   // Filter & Search States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTeamFilter, setSelectedTeamFilter] = useState('all');
   const [selectedStageFilter, setSelectedStageFilter] = useState('all');
-<<<<<<< HEAD
-  const [sortBy, setSortBy] = useState<'points_desc' | 'name_asc' | 'code_asc'>('points_desc');
-=======
   const [sortBy, setSortBy] = useState<'points_desc' | 'name_asc' | 'code_asc'>('name_asc');
->>>>>>> 1a4b379 (3)
 
   // Modal Controllers
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -256,17 +199,11 @@ export default function App() {
 
   // Loading State
   const [isLoading, setIsLoading] = useState(true);
-<<<<<<< HEAD
-
-  // Firestore Realtime Status & Live Impact Toast
-  const [firestoreConnected, setFirestoreConnected] = useState<boolean>(true);
-=======
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Activity notification
   const knownTransactionIds = useRef<Set<string>>(new Set());
   const initialHistoryLoaded = useRef(false);
->>>>>>> 1a4b379 (3)
   const [liveToast, setLiveToast] = useState<{
     id: string;
     performerName: string;
@@ -280,23 +217,6 @@ export default function App() {
   // Load garden public data from API
   const fetchGardenData = async () => {
     try {
-<<<<<<< HEAD
-      const res = await fetch('/api/garden-data');
-      if (res.ok) {
-        const data = await res.json();
-        setStudents(data.students || []);
-        setTeams(data.teams || []);
-        setPositiveActions(data.positiveActions || []);
-        setSettings(data.settings);
-        setAchievements(data.achievements || []);
-        setStudentAchievements(data.studentAchievements || []);
-        setBroadcastMessage(data.broadcastMessage);
-        setTotalClassPoints(data.totalPoints || 0);
-        setTotalDeedsCount(data.totalDeedsCount || 0);
-      }
-    } catch (err) {
-      console.error('Error fetching garden data:', err);
-=======
       const res = await fetch('/api/garden-data', { cache: 'no-store' });
       if (!res.ok) throw new Error('Không thể tải dữ liệu khu vườn từ máy chủ.');
       const data = await res.json();
@@ -314,57 +234,12 @@ export default function App() {
     } catch (err) {
       console.error('Error fetching garden data:', err);
       setLoadError(err instanceof Error ? err.message : 'Lỗi khi tải dữ liệu khu vườn.');
->>>>>>> 1a4b379 (3)
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-<<<<<<< HEAD
-    fetchGardenData();
-    testConnection().then((connected) => setFirestoreConnected(connected));
-  }, []);
-
-  // Real-time Cloud Firestore synchronization across devices
-  useEffect(() => {
-    const knownTxIds = new Set<string>();
-    let isInitial = true;
-
-    const unsubscribeStudents = subscribeToStudents((liveStudents) => {
-      if (liveStudents && liveStudents.length > 0) {
-        setStudents(liveStudents);
-        const total = liveStudents.reduce((acc, s) => acc + (s.totalPoints || 0), 0);
-        setTotalClassPoints(total);
-      }
-    });
-
-    const unsubscribeTx = subscribeToTransactions((liveTx) => {
-      if (!liveTx || liveTx.length === 0) return;
-      setTotalDeedsCount(liveTx.length);
-
-      if (isInitial) {
-        liveTx.forEach((t) => knownTxIds.add(t.id));
-        isInitial = false;
-        return;
-      }
-
-      // Detect incoming transaction from monitors
-      const newItems = liveTx.filter((t) => !knownTxIds.has(t.id));
-      if (newItems.length > 0) {
-        newItems.forEach((t) => knownTxIds.add(t.id));
-        const latest = newItems[0];
-        if (latest.awardedByRole !== 'teacher') {
-          const roleLabel = latest.awardedByRole === 'class_president' ? 'Lớp trưởng' : 'Tổ trưởng';
-          setLiveToast({
-            id: latest.id,
-            performerName: latest.awardedByName,
-            performerRole: roleLabel,
-            studentName: latest.studentName,
-            points: latest.points,
-            reason: latest.actionName,
-            time: new Date(latest.createdAt).toLocaleTimeString('vi-VN', {
-=======
     let active = true;
     const verifySession = async () => {
       if (!session?.token) {
@@ -436,30 +311,12 @@ export default function App() {
             points: latestStaffTransaction.points,
             reason: latestStaffTransaction.actionName,
             time: new Date(latestStaffTransaction.createdAt).toLocaleTimeString('vi-VN', {
->>>>>>> 1a4b379 (3)
               hour: '2-digit',
               minute: '2-digit',
               second: '2-digit',
             }),
           });
         }
-<<<<<<< HEAD
-      }
-    });
-
-    const unsubscribeTeams = subscribeToTeams((liveTeams) => {
-      if (liveTeams && liveTeams.length > 0) {
-        liveTeams.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
-        setTeams(liveTeams);
-      }
-    });
-
-    return () => {
-      unsubscribeStudents();
-      unsubscribeTx();
-      unsubscribeTeams();
-    };
-=======
       } catch (error) {
         console.error('Unable to check for new staff activity:', error);
       }
@@ -467,7 +324,6 @@ export default function App() {
     void pollActivity();
     const intervalId = window.setInterval(pollActivity, 15000);
     return () => window.clearInterval(intervalId);
->>>>>>> 1a4b379 (3)
   }, []);
 
   // Auto-dismiss live toast
@@ -480,14 +336,6 @@ export default function App() {
   // Save session to localStorage
   useEffect(() => {
     if (session) {
-<<<<<<< HEAD
-      localStorage.setItem('bloom_session', JSON.stringify(session));
-    } else {
-      localStorage.removeItem('bloom_session');
-    }
-  }, [session]);
-
-=======
       try {
         localStorage.setItem('bloom_session', JSON.stringify(session));
       } catch (error) {
@@ -508,7 +356,6 @@ export default function App() {
     }
   }, [authReady, currentView, session]);
 
->>>>>>> 1a4b379 (3)
   // Handle Logout
   const handleLogout = async () => {
     if (session?.token) {
@@ -522,14 +369,11 @@ export default function App() {
       }
     }
     setSession(null);
-<<<<<<< HEAD
-=======
     try {
       localStorage.removeItem('bloom_session');
     } catch (error) {
       console.error('Unable to clear saved login session:', error);
     }
->>>>>>> 1a4b379 (3)
     setCurrentView('garden');
   };
 
@@ -639,16 +483,6 @@ export default function App() {
     }
   };
 
-<<<<<<< HEAD
-  if (isLoading || !settings) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-emerald-50/50 text-slate-700">
-        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-3xl animate-bounce mb-4 shadow-sm">
-          🌱
-        </div>
-        <h2 className="text-xl font-bold text-slate-800">BLOOM TOGETHER – A11K65</h2>
-        <p className="text-xs text-slate-500 mt-1">Đang mở cánh cổng khu vườn hạnh phúc...</p>
-=======
   if (!authReady || isLoading || !settings) {
     return (
       <div className="loading-screen">
@@ -665,24 +499,11 @@ export default function App() {
             Thử tải lại
           </button>
         )}
->>>>>>> 1a4b379 (3)
       </div>
     );
   }
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-emerald-50/30 flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
-      <OfflineIndicator />
-
-      {/* ================= TOP NAVIGATION BAR (Top Bar Contract: 3 Zones) ================= */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-emerald-100/80 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
-          
-          {/* Zone 1: Single element brand wordmark */}
-          <a
-            href="#"
-=======
     <div className="garden-page min-h-screen bg-emerald-50/30 flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
       <OfflineIndicator />
       <div className="garden-side-art garden-side-art-left" aria-hidden="true">
@@ -699,41 +520,26 @@ export default function App() {
           {/* Zone 1: Single element brand wordmark */}
           <a
             href="/"
->>>>>>> 1a4b379 (3)
             onClick={(e) => {
               e.preventDefault();
               setCurrentView('garden');
             }}
-<<<<<<< HEAD
-            className="text-base sm:text-lg font-black tracking-tight text-emerald-900 whitespace-nowrap shrink-0 flex items-center gap-2"
-=======
             className="justify-self-start text-base sm:text-lg font-black tracking-tight text-emerald-900 whitespace-nowrap shrink-0 flex items-center gap-2"
->>>>>>> 1a4b379 (3)
           >
             <span className="text-xl">🌱</span>
             <span>BLOOM TOGETHER</span>
           </a>
 
           {/* Zone 2: Navigation links */}
-<<<<<<< HEAD
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-bold text-slate-600">
-            <button
-              onClick={() => setCurrentView('garden')}
-              className={`py-2 px-3 rounded-xl transition flex items-center gap-1.5 ${
-=======
           <nav className="hidden xl:flex min-w-0 items-center justify-center gap-0.5 rounded-2xl border border-slate-200 bg-slate-50/80 p-1.5 text-xs font-bold text-slate-600 whitespace-nowrap overflow-x-auto scrollbar-none">
             <button
               onClick={() => setCurrentView('garden')}
               className={`py-2.5 px-3 rounded-xl transition flex items-center gap-1.5 ${
->>>>>>> 1a4b379 (3)
                 currentView === 'garden'
                   ? 'bg-emerald-100 text-emerald-900 font-extrabold shadow-2xs'
                   : 'hover:text-emerald-700 hover:bg-slate-50'
               }`}
             >
-<<<<<<< HEAD
-              <span>🌱 Khu Vườn</span>
-=======
               <span>Khu Vườn</span>
             </button>
 
@@ -746,129 +552,65 @@ export default function App() {
               }`}
             >
               <span>Góc Tử Tế</span>
->>>>>>> 1a4b379 (3)
             </button>
 
             <button
               onClick={() => setCurrentView('history')}
-<<<<<<< HEAD
-              className={`py-2 px-3 rounded-xl transition flex items-center gap-1.5 ${
-=======
               className={`py-2.5 px-3 rounded-xl transition flex items-center gap-1.5 ${
->>>>>>> 1a4b379 (3)
                 currentView === 'history'
                   ? 'bg-emerald-100 text-emerald-900 font-extrabold shadow-2xs'
                   : 'hover:text-emerald-700 hover:bg-slate-50'
               }`}
             >
-<<<<<<< HEAD
-              <History className="w-3.5 h-3.5" />
-=======
->>>>>>> 1a4b379 (3)
               <span>Lịch Sử Hoạt Động</span>
             </button>
 
             <button
               onClick={() => setCurrentView('leaderboard')}
-<<<<<<< HEAD
-              className={`py-2 px-3 rounded-xl transition flex items-center gap-1.5 ${
-=======
               className={`py-2.5 px-3 rounded-xl transition flex items-center gap-1.5 ${
->>>>>>> 1a4b379 (3)
                 currentView === 'leaderboard'
                   ? 'bg-emerald-100 text-emerald-900 font-extrabold shadow-2xs'
                   : 'hover:text-emerald-700 hover:bg-slate-50'
               }`}
             >
-<<<<<<< HEAD
-              <Trophy className="w-3.5 h-3.5" />
-=======
->>>>>>> 1a4b379 (3)
               <span>Bảng Xếp Hạng</span>
             </button>
 
             <button
               onClick={() => setCurrentView('stats7days')}
-<<<<<<< HEAD
-              className={`py-2 px-3 rounded-xl transition flex items-center gap-1.5 ${
-=======
               className={`py-2.5 px-3 rounded-xl transition flex items-center gap-1.5 ${
->>>>>>> 1a4b379 (3)
                 currentView === 'stats7days'
                   ? 'bg-emerald-100 text-emerald-900 font-extrabold shadow-2xs'
                   : 'hover:text-emerald-700 hover:bg-slate-50'
               }`}
             >
-<<<<<<< HEAD
-              <BarChart3 className="w-3.5 h-3.5" />
-=======
->>>>>>> 1a4b379 (3)
               <span>Thống Kê 7 Ngày</span>
             </button>
 
             <button
               onClick={() => setCurrentView('monthly')}
-<<<<<<< HEAD
-              className={`py-2 px-3 rounded-xl transition flex items-center gap-1.5 ${
-=======
               className={`py-2.5 px-3 rounded-xl transition flex items-center gap-1.5 ${
->>>>>>> 1a4b379 (3)
                 currentView === 'monthly'
                   ? 'bg-emerald-100 text-emerald-900 font-extrabold shadow-2xs'
                   : 'hover:text-emerald-700 hover:bg-slate-50'
               }`}
             >
-<<<<<<< HEAD
-              <Calendar className="w-3.5 h-3.5" />
-=======
->>>>>>> 1a4b379 (3)
               <span>Tổng Kết Tháng</span>
             </button>
 
             <button
               onClick={() => setCurrentView('teamStats')}
-<<<<<<< HEAD
-              className={`py-2 px-3 rounded-xl transition flex items-center gap-1.5 ${
-=======
               className={`py-2.5 px-3 rounded-xl transition flex items-center gap-1.5 ${
->>>>>>> 1a4b379 (3)
                 currentView === 'teamStats'
                   ? 'bg-emerald-100 text-emerald-900 font-extrabold shadow-2xs'
                   : 'hover:text-emerald-700 hover:bg-slate-50'
               }`}
             >
-<<<<<<< HEAD
-              <Users className="w-3.5 h-3.5" />
-=======
->>>>>>> 1a4b379 (3)
               <span>Thống Kê Tổ</span>
             </button>
           </nav>
 
           {/* Zone 3: 1 Primary Action + Auth Controls */}
-<<<<<<< HEAD
-          <div className="flex items-center gap-3 shrink-0">
-            {/* Cloud Firestore Live Status Chip */}
-            <div
-              className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition ${
-                firestoreConnected
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : 'bg-amber-50 text-amber-700 border-amber-200'
-              }`}
-              title={
-                firestoreConnected
-                  ? 'Cloud Firestore: Đang kết nối trực tiếp thời gian thực'
-                  : 'Đang kết nối Firestore...'
-              }
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  firestoreConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-                }`}
-              ></span>
-              <span className="font-bold text-[11px]">Firestore Realtime</span>
-            </div>
-=======
           <div className="justify-self-end flex items-center gap-2 shrink-0">
             <button
               type="button"
@@ -879,7 +621,6 @@ export default function App() {
             >
               {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
->>>>>>> 1a4b379 (3)
 
             <PWAInstallButton />
 
@@ -899,19 +640,6 @@ export default function App() {
                   </button>
                 )}
 
-<<<<<<< HEAD
-                <button
-                  onClick={() => {
-                    setAwardTargetStudent(null);
-                    setIsAwardModalOpen(true);
-                  }}
-                  className="py-2 px-3.5 sm:px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5 active:scale-95"
-                >
-                  <Sprout className="w-4 h-4" />
-                  <span className="hidden sm:inline">Gieo mầm yêu thương</span>
-                  <span className="sm:hidden">Gieo mầm</span>
-                </button>
-=======
                 {session.role !== 'student' && (
                   <button
                     onClick={() => {
@@ -928,7 +656,6 @@ export default function App() {
                 {session.role === 'student' && (
                   <span className="hidden sm:inline text-xs font-bold text-emerald-800">{session.name}</span>
                 )}
->>>>>>> 1a4b379 (3)
 
                 <button
                   onClick={handleLogout}
@@ -943,33 +670,21 @@ export default function App() {
                 onClick={() => setIsLoginModalOpen(true)}
                 className="py-2 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5 active:scale-95"
               >
-<<<<<<< HEAD
-                <Sprout className="w-4 h-4" />
-                <span>Gieo mầm yêu thương</span>
-=======
                 <LogIn className="w-4 h-4" />
                 <span>Đăng nhập</span>
->>>>>>> 1a4b379 (3)
               </button>
             )}
           </div>
         </div>
 
         {/* Mobile / Compact Responsive Navigation Strip */}
-<<<<<<< HEAD
-        <div className="lg:hidden bg-slate-50/90 border-t border-slate-200/60 overflow-x-auto scrollbar-none py-1.5 px-3 flex items-center gap-1 text-[11px] font-bold">
-=======
         <div className="xl:hidden bg-slate-50/90 border-t border-slate-200/60 overflow-x-auto scrollbar-none py-1.5 px-3 flex items-center gap-1 text-[11px] font-bold">
->>>>>>> 1a4b379 (3)
           <button
             onClick={() => setCurrentView('garden')}
             className={`py-1.5 px-2.5 rounded-lg whitespace-nowrap transition ${
               currentView === 'garden' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-<<<<<<< HEAD
-            🌱 Khu Vườn
-=======
             Khu Vườn
           </button>
           <button
@@ -979,7 +694,6 @@ export default function App() {
             }`}
           >
             <span>Góc Tử Tế</span>
->>>>>>> 1a4b379 (3)
           </button>
           <button
             onClick={() => setCurrentView('history')}
@@ -987,10 +701,6 @@ export default function App() {
               currentView === 'history' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-<<<<<<< HEAD
-            <History className="w-3 h-3" />
-=======
->>>>>>> 1a4b379 (3)
             <span>Lịch Sử</span>
           </button>
           <button
@@ -999,10 +709,6 @@ export default function App() {
               currentView === 'leaderboard' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-<<<<<<< HEAD
-            <Trophy className="w-3 h-3" />
-=======
->>>>>>> 1a4b379 (3)
             <span>Xếp Hạng</span>
           </button>
           <button
@@ -1011,10 +717,6 @@ export default function App() {
               currentView === 'stats7days' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-<<<<<<< HEAD
-            <BarChart3 className="w-3 h-3" />
-=======
->>>>>>> 1a4b379 (3)
             <span>7 Ngày</span>
           </button>
           <button
@@ -1023,10 +725,6 @@ export default function App() {
               currentView === 'monthly' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-<<<<<<< HEAD
-            <Calendar className="w-3 h-3" />
-=======
->>>>>>> 1a4b379 (3)
             <span>Tổng Kết Tháng</span>
           </button>
           <button
@@ -1035,20 +733,12 @@ export default function App() {
               currentView === 'teamStats' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:bg-slate-200'
             }`}
           >
-<<<<<<< HEAD
-            <Users className="w-3 h-3" />
-=======
->>>>>>> 1a4b379 (3)
             <span>Thống Kê Tổ</span>
           </button>
         </div>
       </header>
 
       {/* ================= MAIN CONTAINER ================= */}
-<<<<<<< HEAD
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-        
-=======
       <main className="relative z-10 flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
         {currentView === 'garden' && (
           <section className="garden-season-banner relative overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-100 via-lime-50 to-sky-100 px-5 py-5 shadow-sm sm:px-7">
@@ -1064,7 +754,6 @@ export default function App() {
           </section>
         )}
 
->>>>>>> 1a4b379 (3)
         {/* Banner Section */}
         <Banner
           settings={settings}
@@ -1072,10 +761,6 @@ export default function App() {
           onOpenManageBanner={() => setIsManageBannerOpen(true)}
         />
 
-<<<<<<< HEAD
-        {/* ================= TEACHER ADMIN VIEW ================= */}
-        {session?.role === 'teacher' && currentView === 'admin' ? (
-=======
         <Suspense
           fallback={
             <div className="rounded-3xl border border-emerald-100 bg-white p-8 text-center text-sm font-semibold text-emerald-800 shadow-sm">
@@ -1106,7 +791,6 @@ export default function App() {
             </button>
           </section>
         ) : session?.role === 'teacher' && currentView === 'admin' ? (
->>>>>>> 1a4b379 (3)
           <TeacherDashboard
             session={session}
             students={students}
@@ -1185,11 +869,7 @@ export default function App() {
 
             {/* Broadcast Message: CÔ HẰNG NHẮN GỬI */}
             {broadcastMessage && (
-<<<<<<< HEAD
-              <section id="teacher-message" className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 via-rose-50/60 to-emerald-50 border border-amber-200/80 p-6 sm:p-7 shadow-xs">
-=======
               <section id="teacher-message" className="garden-broadcast relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 via-rose-50/60 to-emerald-50 border border-amber-200/80 p-6 sm:p-7 shadow-xs">
->>>>>>> 1a4b379 (3)
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-2xl shrink-0 shadow-xs">
                     💌
@@ -1354,10 +1034,7 @@ export default function App() {
             </section>
           </>
         )}
-<<<<<<< HEAD
-=======
         </Suspense>
->>>>>>> 1a4b379 (3)
       </main>
 
       {/* ================= FOOTER ================= */}
@@ -1387,11 +1064,6 @@ export default function App() {
           onClose={() => setIsLoginModalOpen(false)}
           onLoginSuccess={(newSession) => {
             setSession(newSession);
-<<<<<<< HEAD
-            setIsLoginModalOpen(false);
-            if (newSession.role === 'teacher') {
-              setCurrentView('admin');
-=======
             try {
               localStorage.setItem('bloom_session', JSON.stringify(newSession));
             } catch (error) {
@@ -1402,16 +1074,12 @@ export default function App() {
               window.location.assign(viewPaths.admin);
             } else if (newSession.role === 'student') {
               window.location.assign(viewPaths.community);
->>>>>>> 1a4b379 (3)
             }
           }}
         />
       )}
 
-<<<<<<< HEAD
-=======
       <Suspense fallback={null}>
->>>>>>> 1a4b379 (3)
       {/* 2. Award Points Modal */}
       {isAwardModalOpen && session && (
         <AwardPointsModal
@@ -1457,14 +1125,9 @@ export default function App() {
           onSave={handleUpdateSettings}
         />
       )}
-<<<<<<< HEAD
-
-      {/* 5. Live Activity Notification Toast (Firestore Realtime) */}
-=======
       </Suspense>
 
       {/* 5. Server activity notification toast */}
->>>>>>> 1a4b379 (3)
       {liveToast && (
         <div className="fixed bottom-5 right-5 z-50 max-w-sm w-full bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-4 shadow-2xl border border-amber-400/50 flex items-start gap-3 animate-slideUp">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-900 flex items-center justify-center shrink-0 font-black shadow-md">
@@ -1484,11 +1147,7 @@ export default function App() {
             <p className="text-xs text-slate-300 mt-0.5">
               Đã ghi nhận{' '}
               <strong className={liveToast.points >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
-<<<<<<< HEAD
-                {liveToast.points >= 0 ? `+${liveToast.points}` : liveToast.points} điểm
-=======
                 {formatSignedPoints(liveToast.points)} điểm
->>>>>>> 1a4b379 (3)
               </strong>{' '}
               cho <strong>{liveToast.studentName}</strong>: {liveToast.reason}
             </p>

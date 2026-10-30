@@ -4,11 +4,7 @@ import confetti from 'canvas-confetti';
 import { Sprout, X, CheckCircle2, AlertCircle, Sparkles, Send } from 'lucide-react';
 import { PlantIllustration } from './PlantIllustration';
 import { getPlantStage } from '../utils/plantLevels';
-<<<<<<< HEAD
-import { recordTransactionToFirestore } from '../services/firestoreSync';
-=======
 import { formatSignedPoints } from '../utils/formatPoints';
->>>>>>> 1a4b379 (3)
 
 interface AwardPointsModalProps {
   initialStudent?: Student | null;
@@ -121,22 +117,6 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
         isPending: data.isPending,
       });
 
-<<<<<<< HEAD
-      // Realtime synchronization to Cloud Firestore
-      if (data.transaction) {
-        try {
-          await recordTransactionToFirestore({
-            transaction: data.transaction,
-            studentId: selectedStudentId,
-            pointsDelta: data.isPending ? 0 : (selectedAction?.points || 0),
-          });
-        } catch (fsErr) {
-          console.warn('[Firestore] Realtime broadcast error:', fsErr);
-        }
-      }
-
-=======
->>>>>>> 1a4b379 (3)
       onSuccess(selectedStudentId, selectedAction?.points || 0, data.isPending);
     } catch (err: any) {
       setErrorMsg(err.message || 'Không thể kết nối đến máy chủ.');
@@ -209,11 +189,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
                     {successInfo.isPending
                       ? 'Đang chờ cô Hằng duyệt'
                       : successInfo.points >= 0
-<<<<<<< HEAD
-                        ? `+${successInfo.points} điểm tích cực`
-=======
                         ? `${formatSignedPoints(successInfo.points)} điểm tích cực`
->>>>>>> 1a4b379 (3)
                         : `${successInfo.points} điểm nhắc nhở`}
                   </div>
                 </div>
@@ -334,19 +310,11 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
                     return (
                       <label
                         key={act.id}
-<<<<<<< HEAD
-                        className={`flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition ${
-                          isSelected
-                            ? isPlus
-                              ? 'border-emerald-500 bg-emerald-50/80 font-bold text-slate-900 shadow-sm ring-1 ring-emerald-500'
-                              : 'border-amber-500 bg-amber-50/80 font-bold text-slate-900 shadow-sm ring-1 ring-amber-500'
-=======
                         className={`award-action-option flex items-center justify-between p-2.5 rounded-xl border text-xs cursor-pointer transition ${
                           isSelected
                             ? isPlus
                               ? 'award-action-option--positive-selected border-emerald-500 bg-emerald-50/80 font-bold text-slate-900 shadow-sm ring-1 ring-emerald-500'
                               : 'award-action-option--negative-selected border-amber-500 bg-amber-50/80 font-bold text-slate-900 shadow-sm ring-1 ring-amber-500'
->>>>>>> 1a4b379 (3)
                             : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
                         }`}
                       >
@@ -372,11 +340,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
                               : 'text-amber-700 bg-amber-100/80'
                           }`}
                         >
-<<<<<<< HEAD
-                          {isPlus ? `+${act.points}` : act.points} đ
-=======
                           {formatSignedPoints(act.points)} đ
->>>>>>> 1a4b379 (3)
                         </span>
                       </label>
                     );
@@ -417,11 +381,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
                     <Send className="w-4 h-4" />
                     <span>
                       {pointMode === 'positive'
-<<<<<<< HEAD
-                        ? `Xác nhận Gieo mầm khen thưởng (+${selectedAction?.points || 0} đ)`
-=======
                         ? `Xác nhận Gieo mầm khen thưởng (${formatSignedPoints(selectedAction?.points || 0)} đ)`
->>>>>>> 1a4b379 (3)
                         : `Xác nhận Nhắc nhở nỗ lực (${selectedAction?.points || 0} đ)`}
                     </span>
                   </>

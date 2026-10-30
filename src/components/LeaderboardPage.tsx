@@ -336,15 +336,6 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
                 <div
                   key={std.id}
                   onClick={() => onOpenStudentDetail && onOpenStudentDetail(std)}
-<<<<<<< HEAD
-                  className={`bg-white rounded-2xl p-4 border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                    rank === 1
-                      ? 'border-amber-300 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/30 shadow-md ring-1 ring-amber-300'
-                      : rank === 2
-                      ? 'border-slate-300 bg-gradient-to-r from-slate-50/60 via-white to-slate-50/20 shadow-xs'
-                      : rank === 3
-                      ? 'border-orange-200 bg-gradient-to-r from-orange-50/50 via-white to-orange-50/10 shadow-xs'
-=======
                   className={`leaderboard-student-row rounded-2xl p-4 border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                     rank === 1
                       ? 'leaderboard-student-row--gold border-amber-300 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/30 shadow-md ring-1 ring-amber-300'
@@ -352,7 +343,6 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
                       ? 'leaderboard-student-row--silver border-slate-300 bg-gradient-to-r from-slate-50/60 via-white to-slate-50/20 shadow-xs'
                       : rank === 3
                       ? 'leaderboard-student-row--bronze border-orange-200 bg-gradient-to-r from-orange-50/50 via-white to-orange-50/10 shadow-xs'
->>>>>>> 1a4b379 (3)
                       : 'border-slate-100 hover:border-emerald-200 hover:shadow-sm'
                   }`}
                 >
@@ -451,15 +441,9 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
                 <div
                   key={std.id}
                   onClick={() => onOpenStudentDetail && onOpenStudentDetail(std)}
-<<<<<<< HEAD
-                  className={`bg-white rounded-2xl p-4 border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                    rank === 1
-                      ? 'border-emerald-300 bg-emerald-50/40 shadow-sm ring-1 ring-emerald-300'
-=======
                   className={`leaderboard-student-row rounded-2xl p-4 border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                     rank === 1
                       ? 'leaderboard-student-row--emerald border-emerald-300 bg-emerald-50/40 shadow-sm ring-1 ring-emerald-300'
->>>>>>> 1a4b379 (3)
                       : 'border-slate-100 hover:border-emerald-200'
                   }`}
                 >
@@ -521,15 +505,9 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
                 <div
                   key={std.id}
                   onClick={() => onOpenStudentDetail && onOpenStudentDetail(std)}
-<<<<<<< HEAD
-                  className={`bg-white rounded-2xl p-4 border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                    rank === 1
-                      ? 'border-blue-300 bg-blue-50/40 shadow-sm ring-1 ring-blue-300'
-=======
                   className={`leaderboard-student-row rounded-2xl p-4 border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                     rank === 1
                       ? 'leaderboard-student-row--blue border-blue-300 bg-blue-50/40 shadow-sm ring-1 ring-blue-300'
->>>>>>> 1a4b379 (3)
                       : 'border-slate-100 hover:border-blue-200'
                   }`}
                 >
@@ -591,11 +569,7 @@ export const LeaderboardPage: React.FC<LeaderboardPageProps> = ({
                 <div
                   key={std.id}
                   onClick={() => onOpenStudentDetail && onOpenStudentDetail(std)}
-<<<<<<< HEAD
-                  className="bg-white rounded-2xl p-4 border border-purple-100 hover:border-purple-300 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs"
-=======
                   className="leaderboard-student-row leaderboard-student-row--purple bg-white rounded-2xl p-4 border border-purple-100 hover:border-purple-300 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs"
->>>>>>> 1a4b379 (3)
                 >
                   <div className="flex items-center gap-3.5">
                     <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-800 font-bold text-xs flex items-center justify-center shrink-0">

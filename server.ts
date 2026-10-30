@@ -1,30 +1,16 @@
-<<<<<<< HEAD
-=======
 import 'dotenv/config';
 import 'express-async-errors';
->>>>>>> 1a4b379 (3)
 import express, { Request, Response, NextFunction } from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-<<<<<<< HEAD
-import { initializeApp as initFirebaseServerApp } from 'firebase/app';
-import {
-  getFirestore as getFirebaseServerFirestore,
-  doc as fsDoc,
-  setDoc as fsSetDoc,
-  deleteDoc as fsDeleteDoc,
-  writeBatch as fsWriteBatch,
-} from 'firebase/firestore';
-=======
 import {
   exportFirestoreDatabase,
   loadFirestoreDatabase,
   saveFirestoreDatabase,
 } from './server/firestoreStore';
->>>>>>> 1a4b379 (3)
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -32,13 +18,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
-<<<<<<< HEAD
-=======
 app.use('/api', (_req: Request, res: Response, next: NextFunction) => {
   res.setHeader('Cache-Control', 'no-store');
   next();
 });
->>>>>>> 1a4b379 (3)
 
 // Ensure data folder exists
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -54,134 +37,6 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-<<<<<<< HEAD
-// Initialize Cloud Firestore on server
-let firestoreDB: any = null;
-try {
-  const firebaseConfigPath = path.resolve(process.cwd(), 'firebase-applet-config.json');
-  if (fs.existsSync(firebaseConfigPath)) {
-    const fbCfg = JSON.parse(fs.readFileSync(firebaseConfigPath, 'utf-8'));
-    const fbApp = initFirebaseServerApp(fbCfg);
-    firestoreDB = getFirebaseServerFirestore(fbApp, fbCfg.firestoreDatabaseId || '(default)');
-    console.log('[Server] Cloud Firestore initialized successfully for real-time synchronization.');
-  }
-} catch (e: any) {
-  console.warn('[Server] Could not initialize Cloud Firestore on server:', e.message);
-}
-
-function syncTransactionToFirestore(tx: any, student: any) {
-  if (!firestoreDB) return;
-  try {
-    fsSetDoc(fsDoc(firestoreDB, 'transactions', tx.id), tx).catch((e: any) =>
-      console.warn('[Server Firestore sync error]:', e.message)
-    );
-    if (student) {
-      fsSetDoc(
-        fsDoc(firestoreDB, 'students', student.id),
-        { totalPoints: student.totalPoints, updatedAt: new Date().toISOString() },
-        { merge: true }
-      ).catch((e: any) => console.warn('[Server Firestore sync student error]:', e.message));
-    }
-  } catch (err: any) {
-    console.warn('[Server Firestore sync catch]:', err.message);
-  }
-}
-
-function syncDeleteTransactionFromFirestore(txId: string, student: any, auditLog?: any) {
-  if (!firestoreDB) return;
-  try {
-    fsDeleteDoc(fsDoc(firestoreDB, 'transactions', txId)).catch((e: any) =>
-      console.warn('[Server Firestore delete error]:', e.message)
-    );
-    if (student) {
-      fsSetDoc(
-        fsDoc(firestoreDB, 'students', student.id),
-        { totalPoints: student.totalPoints, updatedAt: new Date().toISOString() },
-        { merge: true }
-      ).catch((e: any) => console.warn('[Server Firestore sync student error]:', e.message));
-    }
-    if (auditLog) {
-      fsSetDoc(fsDoc(firestoreDB, 'auditLogs', auditLog.id), auditLog).catch((e: any) =>
-        console.warn('[Server Firestore auditLog error]:', e.message)
-      );
-    }
-  } catch (err: any) {
-    console.warn('[Server Firestore delete catch]:', err.message);
-  }
-}
-
-function syncStudentToFirestore(student: any) {
-  if (!firestoreDB || !student) return;
-  try {
-    fsSetDoc(
-      fsDoc(firestoreDB, 'students', student.id),
-      {
-        id: student.id,
-        code: student.code,
-        name: student.name,
-        teamId: student.teamId,
-        role: student.role || 'student',
-        totalPoints: student.totalPoints || 0,
-        gender: student.gender || 'other',
-        avatarUrl: student.avatarUrl || null,
-        notes: student.notes || '',
-        updatedAt: new Date().toISOString(),
-      },
-      { merge: true }
-    ).catch((e: any) => console.warn('[Server Firestore sync student error]:', e.message));
-  } catch (err: any) {
-    console.warn('[Server Firestore sync student catch]:', err.message);
-  }
-}
-
-function syncDeleteStudentFromFirestore(studentId: string) {
-  if (!firestoreDB) return;
-  try {
-    fsDeleteDoc(fsDoc(firestoreDB, 'students', studentId)).catch((e: any) =>
-      console.warn('[Server Firestore delete student error]:', e.message)
-    );
-  } catch (err: any) {
-    console.warn('[Server Firestore delete student catch]:', err.message);
-  }
-}
-
-async function syncAllStudentsToFirestore(students: any[]) {
-  if (!firestoreDB) return 0;
-  try {
-    const batch = fsWriteBatch(firestoreDB);
-    let count = 0;
-    for (const s of students) {
-      if (s.isArchived) continue;
-      const ref = fsDoc(firestoreDB, 'students', s.id);
-      batch.set(
-        ref,
-        {
-          id: s.id,
-          code: s.code,
-          name: s.name,
-          teamId: s.teamId,
-          role: s.role || 'student',
-          totalPoints: s.totalPoints || 0,
-          gender: s.gender || 'other',
-          avatarUrl: s.avatarUrl || null,
-          notes: s.notes || '',
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true }
-      );
-      count++;
-    }
-    await batch.commit();
-    console.log(`[Server] Batch synced ${count} students to Cloud Firestore.`);
-    return count;
-  } catch (err: any) {
-    console.error('[Server] batch sync students error:', err.message);
-    return 0;
-  }
-}
-
-=======
->>>>>>> 1a4b379 (3)
 // ================= INITIAL SEED DATA =================
 function getInitialData() {
   const salt = bcrypt.genSaltSync(10);
@@ -426,26 +281,8 @@ function getInitialData() {
   };
 }
 
-<<<<<<< HEAD
-// Persistent database read/write
-function readDB() {
-  let db: any;
-  if (!fs.existsSync(DB_FILE)) {
-    db = getInitialData();
-  } else {
-    try {
-      const raw = fs.readFileSync(DB_FILE, 'utf-8');
-      db = JSON.parse(raw);
-    } catch (err) {
-      console.error('Error reading DB, re-initializing:', err);
-      db = getInitialData();
-    }
-  }
-
-=======
 // Normalize legacy data after loading it from the configured source of truth.
 function normalizeDatabase(db: any): { database: any; changed: boolean } {
->>>>>>> 1a4b379 (3)
   let changed = false;
 
   // Auto-migration: Ensure deduction actions exist
@@ -663,15 +500,6 @@ function normalizeDatabase(db: any): { database: any; changed: boolean } {
     changed = true;
   }
 
-<<<<<<< HEAD
-  if (changed) {
-    writeDB(db);
-  }
-  return db;
-}
-
-function writeDB(data: any) {
-=======
   return { database: db, changed };
 }
 
@@ -766,16 +594,11 @@ function readJSONDatabase() {
 }
 
 function writeJSONDatabase(data: any) {
->>>>>>> 1a4b379 (3)
   const tmpPath = `${DB_FILE}.tmp.${Date.now()}`;
   fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
   fs.renameSync(tmpPath, DB_FILE);
 }
 
-<<<<<<< HEAD
-// Ensure database file initialized
-readDB();
-=======
 async function initializeDatabase(): Promise<void> {
   if (!databaseInitialization) {
     databaseInitialization = (async () => {
@@ -869,16 +692,11 @@ app.use('/api', async (req: Request, res: Response, next: NextFunction) => {
   res.once('close', releaseOnce);
   next();
 });
->>>>>>> 1a4b379 (3)
 
 // Active server sessions store
 interface SessionInfo {
   token: string;
-<<<<<<< HEAD
-  role: 'teacher' | 'class_president' | 'team_leader';
-=======
   role: 'teacher' | 'class_president' | 'team_leader' | 'student';
->>>>>>> 1a4b379 (3)
   name: string;
   studentId?: string;
   studentCode?: string;
@@ -923,12 +741,9 @@ function authenticate(req: Request, res: Response, next: NextFunction) {
 }
 
 // ================= API ROUTES =================
-<<<<<<< HEAD
-=======
 app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ ok: true, database: isProduction ? 'firestore' : 'json' });
 });
->>>>>>> 1a4b379 (3)
 
 // 1. AUTHENTICATION
 
@@ -1040,8 +855,6 @@ app.post('/api/auth/staff-login', (req: Request, res: Response) => {
   });
 });
 
-<<<<<<< HEAD
-=======
 app.post('/api/auth/student-login', (req: Request, res: Response) => {
   const { studentCode, pin } = req.body;
   if (typeof studentCode !== 'string' || typeof pin !== 'string' || !studentCode.trim() || !pin.trim()) {
@@ -1130,7 +943,6 @@ app.post('/api/auth/change-student-pin', authenticate, async (req: Request, res:
   res.json({ success: true, message: 'Đã đổi PIN riêng thành công.' });
 });
 
->>>>>>> 1a4b379 (3)
 // Check current session
 app.get('/api/auth/me', authenticate, (req: Request, res: Response) => {
   const user = (req as any).user as SessionInfo;
@@ -1139,11 +951,6 @@ app.get('/api/auth/me', authenticate, (req: Request, res: Response) => {
   // If student staff, recheck if role was revoked
   if (user.role !== 'teacher') {
     const student = db.students.find((s: any) => s.id === user.studentId && !s.isArchived);
-<<<<<<< HEAD
-    if (!student || (student.role !== 'class_president' && student.role !== 'team_leader')) {
-      activeSessions.delete(user.token);
-      return res.status(401).json({ error: 'Quyền cán sự của bạn đã được giáo viên thu hồi.' });
-=======
     if (
       !student ||
       (user.role !== 'student' &&
@@ -1152,7 +959,6 @@ app.get('/api/auth/me', authenticate, (req: Request, res: Response) => {
     ) {
       activeSessions.delete(user.token);
       return res.status(401).json({ error: 'Tài khoản hoặc quyền truy cập không còn hợp lệ.' });
->>>>>>> 1a4b379 (3)
     }
   }
 
@@ -1186,10 +992,7 @@ app.get('/api/garden-data', (req: Request, res: Response) => {
       gender: s.gender,
       notes: s.notes,
       hasPin: !!s.pinHash,
-<<<<<<< HEAD
-=======
       hasStudentPin: !!s.studentPinHash,
->>>>>>> 1a4b379 (3)
       createdAt: s.createdAt,
     }));
 
@@ -1204,10 +1007,7 @@ app.get('/api/garden-data', (req: Request, res: Response) => {
     settings: {
       ...db.settings,
       classAccessCode: undefined, // do not leak access code
-<<<<<<< HEAD
-=======
       studentInitialPinHash: undefined,
->>>>>>> 1a4b379 (3)
     },
     achievements: db.achievements,
     studentAchievements: db.studentAchievements,
@@ -1216,8 +1016,6 @@ app.get('/api/garden-data', (req: Request, res: Response) => {
   });
 });
 
-<<<<<<< HEAD
-=======
 function dateInVietnam(time: string): string {
   return new Date(time).toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
 }
@@ -1491,7 +1289,6 @@ app.get('/api/reports/class', authenticate, (req: Request, res: Response) => {
   });
 });
 
->>>>>>> 1a4b379 (3)
 // 3. RECENT ACTIVITY & AUDIT LOGS
 app.get('/api/transactions/recent', (req: Request, res: Response) => {
   const db = readDB();
@@ -1528,13 +1325,6 @@ app.get('/api/transactions/recent', (req: Request, res: Response) => {
 // 4. POINT TRANSACTIONS (CRITICAL PERMISSION ENFORCEMENT)
 const recentAwardLocks = new Set<string>();
 
-<<<<<<< HEAD
-app.post('/api/transactions/award', authenticate, (req: Request, res: Response) => {
-  const user = (req as any).user as SessionInfo;
-  const { studentId, actionId, note, idempotencyKey } = req.body;
-
-  if (!studentId || !actionId) {
-=======
 app.post('/api/transactions/award', authenticate, async (req: Request, res: Response) => {
   const user = (req as any).user as SessionInfo;
   const { studentId, studentCode, actionId, note, idempotencyKey } = req.body;
@@ -1546,7 +1336,6 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
     typeof actionId !== 'string' ||
     !actionId
   ) {
->>>>>>> 1a4b379 (3)
     return res.status(400).json({ error: 'Thiếu thông tin học sinh hoặc hành động tốt.' });
   }
 
@@ -1559,12 +1348,6 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
   setTimeout(() => recentAwardLocks.delete(lockKey), 4000);
 
   const db = readDB();
-<<<<<<< HEAD
-  const targetStudent = db.students.find((s: any) => s.id === studentId && !s.isArchived);
-  if (!targetStudent) {
-    return res.status(404).json({ error: 'Không tìm thấy học sinh được cộng điểm.' });
-  }
-=======
   const matchingStudents = db.students.filter((s: any) => s.id === studentId);
   if (matchingStudents.length > 1) {
     return res.status(409).json({ error: 'Dữ liệu có mã học sinh bị trùng; giao dịch đã bị dừng.' });
@@ -1579,18 +1362,14 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
   if (studentCode !== undefined && studentCode !== targetStudent.code) {
     return res.status(409).json({ error: 'Mã học sinh đã thay đổi; hãy tải lại danh sách.' });
   }
->>>>>>> 1a4b379 (3)
 
   const action = db.positiveActions.find((a: any) => a.id === actionId && a.isActive);
   if (!action) {
     return res.status(404).json({ error: 'Hành động tốt này không hợp lệ hoặc đã bị tạm ẩn.' });
   }
-<<<<<<< HEAD
-=======
   if (action.points < 0 && user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được ghi nhận thao tác trừ điểm.' });
   }
->>>>>>> 1a4b379 (3)
 
   const targetTeam = db.teams.find((t: any) => t.id === targetStudent.teamId);
 
@@ -1635,18 +1414,11 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
   const isPending = user.role !== 'teacher' && action.requiresApproval;
   const status = isPending ? 'pending' : 'approved';
 
-<<<<<<< HEAD
-  const txId = `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-  const newTx = {
-    id: txId,
-    studentId: targetStudent.id,
-=======
   const txId = `tx-${crypto.randomUUID()}`;
   const newTx = {
     id: txId,
     studentId: targetStudent.id,
     studentCode: targetStudent.code,
->>>>>>> 1a4b379 (3)
     studentName: targetStudent.name,
     teamIdAtTime: targetStudent.teamId,
     teamNameAtTime: targetTeam?.name || '',
@@ -1658,10 +1430,7 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
     points: action.points,
     note: note ? String(note).trim() : '',
     status,
-<<<<<<< HEAD
-=======
     approvedByRole: user.role === 'teacher' ? 'teacher' : undefined,
->>>>>>> 1a4b379 (3)
     createdAt: new Date().toISOString(),
     approvedAt: status === 'approved' ? new Date().toISOString() : undefined,
   };
@@ -1672,12 +1441,7 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
     targetStudent.totalPoints = (targetStudent.totalPoints || 0) + action.points;
   }
 
-<<<<<<< HEAD
-  writeDB(db);
-  syncTransactionToFirestore(newTx, targetStudent);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
 
   const negativeMessage = action.points < 0
     ? `Cô Bùi Hằng đã nhắc nhở và trừ ${Math.abs(action.points)} điểm cho ${targetStudent.name} vì hành vi chưa tốt. Hãy rèn luyện thêm trong lần sau.`
@@ -1697,11 +1461,7 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
 });
 
 // Teacher: Approve pending transaction
-<<<<<<< HEAD
-app.post('/api/transactions/:id/approve', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/transactions/:id/approve', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền duyệt điểm.' });
@@ -1721,10 +1481,7 @@ app.post('/api/transactions/:id/approve', authenticate, async (req: Request, res
 
   tx.status = 'approved';
   tx.approvedAt = new Date().toISOString();
-<<<<<<< HEAD
-=======
   tx.approvedByRole = user.role;
->>>>>>> 1a4b379 (3)
 
   // Add points to student
   const student = db.students.find((s: any) => s.id === tx.studentId);
@@ -1732,21 +1489,13 @@ app.post('/api/transactions/:id/approve', authenticate, async (req: Request, res
     student.totalPoints = (student.totalPoints || 0) + tx.points;
   }
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
 
   res.json({ success: true, transaction: tx });
 });
 
 // Teacher: Cancel transaction with reason (recalculating points accurately)
-<<<<<<< HEAD
-app.post('/api/transactions/:id/cancel', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/transactions/:id/cancel', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền hủy giao dịch điểm.' });
@@ -1794,11 +1543,7 @@ app.post('/api/transactions/:id/cancel', authenticate, async (req: Request, res:
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
 
   res.json({ success: true, transaction: tx });
 });
@@ -1823,11 +1568,7 @@ app.get('/api/transactions/history', (req: Request, res: Response) => {
 });
 
 // Single transaction delete (Teacher only, with strict Audit Log)
-<<<<<<< HEAD
-app.delete('/api/transactions/:id', authenticate, (req: Request, res: Response) => {
-=======
 app.delete('/api/transactions/:id', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền xóa bản ghi lịch sử.' });
@@ -1863,21 +1604,12 @@ app.delete('/api/transactions/:id', authenticate, async (req: Request, res: Resp
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-  syncDeleteTransactionFromFirestore(id, student, db.auditLogs[0]);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, message: 'Đã xóa bản ghi thành công.' });
 });
 
 // Bulk delete transactions (Teacher only, with strict Audit Log)
-<<<<<<< HEAD
-app.post('/api/transactions/bulk-delete', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/transactions/bulk-delete', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền xóa các bản ghi lịch sử.' });
@@ -1915,20 +1647,12 @@ app.post('/api/transactions/bulk-delete', authenticate, async (req: Request, res
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, count: deletedTxs.length, message: `Đã xóa ${deletedTxs.length} bản ghi thành công.` });
 });
 
 // Clear ALL transactions history (Teacher only, requires password + double confirmation)
-<<<<<<< HEAD
-app.post('/api/transactions/clear-all', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/transactions/clear-all', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền xóa toàn bộ lịch sử.' });
@@ -1969,11 +1693,7 @@ app.post('/api/transactions/clear-all', authenticate, async (req: Request, res: 
     s.totalPoints = 0;
   }
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({
     success: true,
     message: 'Bạn sắp xóa toàn bộ lịch sử cộng và trừ điểm. Dữ liệu sau khi xóa sẽ không thể khôi phục nếu chưa sao lưu.',
@@ -1982,11 +1702,7 @@ app.post('/api/transactions/clear-all', authenticate, async (req: Request, res: 
 });
 
 // Update/Adjust a transaction (Teacher only, logs before & after)
-<<<<<<< HEAD
-app.put('/api/transactions/:id', authenticate, (req: Request, res: Response) => {
-=======
 app.put('/api/transactions/:id', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền điều chỉnh bản ghi lịch sử.' });
@@ -2026,11 +1742,7 @@ app.put('/api/transactions/:id', authenticate, async (req: Request, res: Respons
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, transaction: tx });
 });
 
@@ -2043,11 +1755,7 @@ app.get('/api/audit-logs', authenticate, (req: Request, res: Response) => {
   const db = readDB();
   res.json(db.auditLogs || []);
 });
-<<<<<<< HEAD
-app.post('/api/students', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/students', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được thêm học sinh.' });
@@ -2080,21 +1788,12 @@ app.post('/api/students', authenticate, async (req: Request, res: Response) => {
   };
 
   db.students.push(newStudent);
-<<<<<<< HEAD
-  writeDB(db);
-  syncStudentToFirestore(newStudent);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
 
   res.json({ success: true, student: newStudent });
 });
 
-<<<<<<< HEAD
-app.put('/api/students/:id', authenticate, (req: Request, res: Response) => {
-=======
 app.put('/api/students/:id', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được cập nhật học sinh.' });
@@ -2141,21 +1840,12 @@ app.put('/api/students/:id', authenticate, async (req: Request, res: Response) =
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-  syncStudentToFirestore(student);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, student });
 });
 
 // Delete / Archive student
-<<<<<<< HEAD
-app.delete('/api/students/:id', authenticate, (req: Request, res: Response) => {
-=======
 app.delete('/api/students/:id', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới có quyền xóa học sinh.' });
@@ -2185,21 +1875,12 @@ app.delete('/api/students/:id', authenticate, async (req: Request, res: Response
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-  syncDeleteStudentFromFirestore(student.id);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, message: `Đã xóa học sinh ${student.name} khỏi danh sách.` });
 });
 
 // Transfer student team (preserving points and history!)
-<<<<<<< HEAD
-app.post('/api/students/:id/transfer-team', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/students/:id/transfer-team', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được chuyển tổ học sinh.' });
@@ -2239,21 +1920,12 @@ app.post('/api/students/:id/transfer-team', authenticate, async (req: Request, r
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-  syncStudentToFirestore(student);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, student });
 });
 
 // Role assignment & PIN management (Teacher only)
-<<<<<<< HEAD
-app.post('/api/students/:id/role', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/students/:id/role', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được phân quyền ban cán sự.' });
@@ -2311,12 +1983,7 @@ app.post('/api/students/:id/role', authenticate, async (req: Request, res: Respo
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-  syncStudentToFirestore(student);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
 
   res.json({
     success: true,
@@ -2332,11 +1999,7 @@ app.post('/api/students/:id/role', authenticate, async (req: Request, res: Respo
 });
 
 // Bulk import students from JSON (parsed from CSV/Excel)
-<<<<<<< HEAD
-app.post('/api/students/import', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/students/import', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được nhập danh sách học sinh.' });
@@ -2382,60 +2045,17 @@ app.post('/api/students/import', authenticate, async (req: Request, res: Respons
     }
   }
 
-<<<<<<< HEAD
-  writeDB(db);
-  syncAllStudentsToFirestore(db.students);
-  res.json({ success: true, addedCount, updatedCount });
-});
-
-// Sync all students to Cloud Firestore
-app.post('/api/students/sync-firestore', authenticate, async (req: Request, res: Response) => {
-  const user = (req as any).user as SessionInfo;
-  if (user.role !== 'teacher') {
-    return res.status(403).json({ error: 'Chỉ giáo viên mới có quyền đồng bộ dữ liệu lên Firestore.' });
-  }
-
-  const db = readDB();
-  const activeStudents = db.students.filter((s: any) => !s.isArchived);
-  const syncedCount = await syncAllStudentsToFirestore(activeStudents);
-
-  if (firestoreDB && db.teams) {
-    try {
-      const batch = fsWriteBatch(firestoreDB);
-      for (const t of db.teams) {
-        batch.set(fsDoc(firestoreDB, 'teams', t.id), t, { merge: true });
-      }
-      await batch.commit();
-    } catch (e: any) {
-      console.warn('Sync teams error:', e.message);
-    }
-  }
-
-  res.json({
-    success: true,
-    totalStudents: activeStudents.length,
-    syncedCount,
-    message: `Đã kết nối và đồng bộ thành công ${syncedCount}/${activeStudents.length} học sinh lên Cloud Firestore!`,
-  });
-});
-
-=======
   await writeDB(db);
   res.json({ success: true, addedCount, updatedCount });
 });
 
->>>>>>> 1a4b379 (3)
 // 6. TEAMS CRUD
 app.get('/api/teams', (req: Request, res: Response) => {
   const db = readDB();
   res.json(db.teams);
 });
 
-<<<<<<< HEAD
-app.put('/api/teams/:id', authenticate, (req: Request, res: Response) => {
-=======
 app.put('/api/teams/:id', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được sửa thông tin tổ.' });
@@ -2455,11 +2075,7 @@ app.put('/api/teams/:id', authenticate, async (req: Request, res: Response) => {
   if (color) team.color = color;
   if (leaderStudentId !== undefined) team.leaderStudentId = leaderStudentId;
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, team });
 });
 
@@ -2469,11 +2085,7 @@ app.get('/api/actions', (req: Request, res: Response) => {
   res.json(db.positiveActions);
 });
 
-<<<<<<< HEAD
-app.post('/api/actions', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/actions', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được thêm hành động tốt.' });
@@ -2495,19 +2107,11 @@ app.post('/api/actions', authenticate, async (req: Request, res: Response) => {
   };
 
   db.positiveActions.push(newAction);
-<<<<<<< HEAD
-  writeDB(db);
-  res.json({ success: true, action: newAction });
-});
-
-app.put('/api/actions/:id', authenticate, (req: Request, res: Response) => {
-=======
   await writeDB(db);
   res.json({ success: true, action: newAction });
 });
 
 app.put('/api/actions/:id', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được chỉnh sửa hành động tốt.' });
@@ -2527,20 +2131,12 @@ app.put('/api/actions/:id', authenticate, async (req: Request, res: Response) =>
   if (requiresApproval !== undefined) action.requiresApproval = !!requiresApproval;
   if (isActive !== undefined) action.isActive = !!isActive;
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, action });
 });
 
 // 8. MESSAGES & ENCOURAGEMENTS
-<<<<<<< HEAD
-app.put('/api/messages/broadcast', authenticate, (req: Request, res: Response) => {
-=======
 app.put('/api/messages/broadcast', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được đổi lời nhắn chung.' });
@@ -2559,20 +2155,12 @@ app.put('/api/messages/broadcast', authenticate, async (req: Request, res: Respo
     createdAt: new Date().toISOString(),
   };
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, broadcastMessage: db.broadcastMessage });
 });
 
 // Personal message (public or private)
-<<<<<<< HEAD
-app.post('/api/messages/personal', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/messages/personal', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được gửi lời nhắn riêng.' });
@@ -2600,11 +2188,7 @@ app.post('/api/messages/personal', authenticate, async (req: Request, res: Respo
   };
 
   db.personalMessages.push(newMsg);
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
 
   res.json({ success: true, message: newMsg });
 });
@@ -2634,11 +2218,7 @@ app.get('/api/messages/student/:studentId', (req: Request, res: Response) => {
 });
 
 // 9. ACHIEVEMENTS AWARD
-<<<<<<< HEAD
-app.post('/api/achievements/award', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/achievements/award', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được trao danh hiệu.' });
@@ -2663,11 +2243,7 @@ app.post('/api/achievements/award', authenticate, async (req: Request, res: Resp
   };
 
   db.studentAchievements.push(newRecord);
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
 
   res.json({ success: true, studentAchievement: newRecord });
 });
@@ -2675,12 +2251,6 @@ app.post('/api/achievements/award', authenticate, async (req: Request, res: Resp
 // 10. APP SETTINGS & BRANDING
 app.get('/api/settings', (req: Request, res: Response) => {
   const db = readDB();
-<<<<<<< HEAD
-  res.json(db.settings);
-});
-
-app.put('/api/settings', authenticate, (req: Request, res: Response) => {
-=======
   res.json({
     ...db.settings,
     classAccessCode: undefined,
@@ -2689,7 +2259,6 @@ app.put('/api/settings', authenticate, (req: Request, res: Response) => {
 });
 
 app.put('/api/settings', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được thay đổi cài đặt giao diện.' });
@@ -2716,20 +2285,12 @@ app.put('/api/settings', authenticate, async (req: Request, res: Response) => {
     }
   }
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, settings: db.settings });
 });
 
 // Change teacher master password
-<<<<<<< HEAD
-app.put('/api/settings/password', authenticate, (req: Request, res: Response) => {
-=======
 app.put('/api/settings/password', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới có quyền đổi mật khẩu quản trị.' });
@@ -2759,11 +2320,7 @@ app.put('/api/settings/password', authenticate, async (req: Request, res: Respon
     timestamp: new Date().toISOString(),
   });
 
-<<<<<<< HEAD
-  writeDB(db);
-=======
   await writeDB(db);
->>>>>>> 1a4b379 (3)
   res.json({ success: true, message: 'Đổi mật khẩu thành công.' });
 });
 
@@ -2858,29 +2415,13 @@ app.get('/api/backup/export', authenticate, (req: Request, res: Response) => {
   res.json(db);
 });
 
-<<<<<<< HEAD
-app.post('/api/backup/restore', authenticate, (req: Request, res: Response) => {
-=======
 app.post('/api/backup/restore', authenticate, async (req: Request, res: Response) => {
->>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được phục hồi dữ liệu.' });
   }
 
   const { backupData } = req.body;
-<<<<<<< HEAD
-  if (!backupData || !backupData.students || !backupData.teams) {
-    return res.status(400).json({ error: 'Tệp sao lưu không hợp lệ.' });
-  }
-
-  writeDB(backupData);
-  res.json({ success: true, message: 'Phục hồi dữ liệu thành công.' });
-});
-
-// ================= VITE DEV MIDDLEWARE OR STATIC SERVE =================
-async function startServer() {
-=======
   if (
     !backupData ||
     !Array.isArray(backupData.students) ||
@@ -2912,7 +2453,6 @@ app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
 // ================= VITE DEV MIDDLEWARE OR STATIC SERVE =================
 async function startServer() {
   await initializeDatabase();
->>>>>>> 1a4b379 (3)
   if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -2927,22 +2467,6 @@ async function startServer() {
     });
   }
 
-<<<<<<< HEAD
-  if (!process.env.VERCEL) {
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🌸 BLOOM TOGETHER – A11K65 server running on port ${PORT}`);
-    });
-  }
-}
-
-if (process.env.VERCEL) {
-  startServer().catch((err) => {
-    console.error('[Server] Failed to initialize Vercel server:', err);
-  });
-} else {
-  startServer();
-}
-=======
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🌸 BLOOM TOGETHER – A11K65 server running on port ${PORT}`);
   });
@@ -2952,6 +2476,5 @@ startServer().catch((err) => {
   console.error('[Server] Failed to initialize:', err);
   process.exitCode = 1;
 });
->>>>>>> 1a4b379 (3)
 
 export default app;

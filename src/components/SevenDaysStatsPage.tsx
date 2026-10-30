@@ -2,10 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Student, Team, PointTransaction, PositiveAction } from '../types';
 import { PlantIllustration } from './PlantIllustration';
 import { getPlantStage } from '../utils/plantLevels';
-<<<<<<< HEAD
-=======
 import { formatSignedPoints } from '../utils/formatPoints';
->>>>>>> 1a4b379 (3)
 import {
   Calendar,
   Clock,
@@ -872,11 +869,7 @@ export const SevenDaysStatsPage: React.FC<SevenDaysStatsPageProps> = ({
                                 : 'bg-amber-100 text-amber-800'
                             }`}
                           >
-<<<<<<< HEAD
-                            {isPositive ? `+${tx.points}` : tx.points} đ
-=======
                             {formatSignedPoints(tx.points)} đ
->>>>>>> 1a4b379 (3)
                           </span>
                         </div>
                       );

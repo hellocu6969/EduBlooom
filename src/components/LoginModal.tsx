@@ -13,20 +13,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onLoginSuccess,
   staffList,
 }) => {
-<<<<<<< HEAD
-  const [tab, setTab] = useState<'teacher' | 'staff'>('teacher');
-=======
   const [tab, setTab] = useState<'teacher' | 'staff' | 'student'>('teacher');
->>>>>>> 1a4b379 (3)
 
   const [teacherPassword, setTeacherPassword] = useState('');
   const [selectedStaffCode, setSelectedStaffCode] = useState(staffList[0]?.code || '');
   const [staffPin, setStaffPin] = useState('');
-<<<<<<< HEAD
-=======
   const [studentCode, setStudentCode] = useState('');
   const [studentPin, setStudentPin] = useState('');
->>>>>>> 1a4b379 (3)
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -94,8 +87,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
-<<<<<<< HEAD
-=======
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentCode.trim() || !studentPin.trim()) {
@@ -121,7 +112,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
->>>>>>> 1a4b379 (3)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-emerald-100 flex flex-col relative">
@@ -151,22 +141,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               setTab('teacher');
               setErrorMsg(null);
             }}
-<<<<<<< HEAD
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-=======
             className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
->>>>>>> 1a4b379 (3)
               tab === 'teacher'
                 ? 'bg-white text-emerald-800 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
-<<<<<<< HEAD
-            <span>Giáo viên chủ nhiệm</span>
-=======
             <span>Giáo viên</span>
->>>>>>> 1a4b379 (3)
           </button>
 
           <button
@@ -175,20 +157,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               setTab('staff');
               setErrorMsg(null);
             }}
-<<<<<<< HEAD
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-=======
             className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
->>>>>>> 1a4b379 (3)
               tab === 'staff'
                 ? 'bg-white text-emerald-800 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-<<<<<<< HEAD
-            <span>Ban cán sự lớp</span>
-=======
             <span>Cán sự</span>
           </button>
           <button
@@ -205,7 +180,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           >
             <Users className="w-3.5 h-3.5" />
             <span>Học sinh</span>
->>>>>>> 1a4b379 (3)
           </button>
         </div>
 
@@ -293,8 +267,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             </button>
           </form>
         )}
-<<<<<<< HEAD
-=======
 
         {tab === 'student' && (
           <form onSubmit={handleStudentSubmit} className="space-y-4">
@@ -333,7 +305,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             </button>
           </form>
         )}
->>>>>>> 1a4b379 (3)
       </div>
     </div>
   );

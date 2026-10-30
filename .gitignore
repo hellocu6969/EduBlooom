@@ -6,7 +6,4 @@ coverage/
 *.log
 .env*
 !.env.example
-<<<<<<< HEAD
-=======
 data/backups/
->>>>>>> 1a4b379 (3)

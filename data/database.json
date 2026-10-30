@@ -2247,12 +2247,8 @@
     "bannerBgUrl": "/uploads/banner-1792085189500-809.jpg",
     "requireClassCode": false,
     "classAccessCode": "A11K65",
-<<<<<<< HEAD
-    "maxDailyStaffPoints": 30
-=======
     "maxDailyStaffPoints": 30,
     "studentInitialPinHash": "$2b$10$z0KG6pw2xJhiJTfVzs4pDesFHz1ibJ6VqKc1XCbdTP3IxJ4Ba1fGu"
->>>>>>> 1a4b379 (3)
   },
   "auditLogs": [
     {
@@ -2283,14 +2279,10 @@
       "details": "Khởi tạo cơ sở dữ liệu khu vườn A11K65",
       "timestamp": "2026-10-14T08:53:49.228Z"
     }
-<<<<<<< HEAD
-  ]
-=======
   ],
   "weeklyChallenges": [],
   "classEvents": [],
   "studentGoals": [],
   "studentGratitude": [],
   "plantRewards": []
->>>>>>> 1a4b379 (3)
 }
