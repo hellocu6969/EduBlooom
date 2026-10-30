@@ -1,5 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { PointTransaction, Student, Team, AuthSession, AuditLog } from '../types';
+<<<<<<< HEAD
+=======
+import { formatSignedPoints } from '../utils/formatPoints';
+>>>>>>> 1a4b379 (3)
 import {
   History,
   Search,
@@ -22,7 +26,10 @@ import {
   Zap,
   Radio,
 } from 'lucide-react';
+<<<<<<< HEAD
 import { subscribeToTransactions, subscribeToAuditLogs } from '../services/firestoreSync';
+=======
+>>>>>>> 1a4b379 (3)
 
 interface ActivityHistoryPageProps {
   session: AuthSession | null;
@@ -53,7 +60,10 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
   const [dateRangeMode, setDateRangeMode] = useState<'all' | '7days' | '30days' | 'custom'>('all');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+<<<<<<< HEAD
   const [isLiveConnected, setIsLiveConnected] = useState<boolean>(true);
+=======
+>>>>>>> 1a4b379 (3)
 
   // Bulk Selection (Teacher only)
   const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
@@ -83,7 +93,11 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
       if (session?.token) {
         headers.Authorization = `Bearer ${session.token}`;
       }
+<<<<<<< HEAD
       const res = await fetch('/api/transactions/history', { headers });
+=======
+      const res = await fetch('/api/transactions/history', { headers, cache: 'no-store' });
+>>>>>>> 1a4b379 (3)
       if (!res.ok) throw new Error('Không thể tải lịch sử hoạt động');
       const data = await res.json();
       setTransactions(data || []);
@@ -95,6 +109,7 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
   };
 
   useEffect(() => {
+<<<<<<< HEAD
     fetchHistory();
 
     // Subscribe to Realtime Cloud Firestore point transactions
@@ -127,6 +142,14 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
     return () => {
       unsubTx();
       unsubAudit();
+=======
+    void fetchHistory();
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void fetchHistory();
+    }, 30000);
+    return () => {
+      window.clearInterval(intervalId);
+>>>>>>> 1a4b379 (3)
     };
   }, [session]);
 
@@ -437,7 +460,11 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
         `"${tx.studentName}"`,
         `"${tx.teamNameAtTime || ''}"`,
         `"${typeStr}"`,
+<<<<<<< HEAD
         `"${tx.points >= 0 ? `+${tx.points}` : tx.points}"`,
+=======
+        `"${formatSignedPoints(tx.points)}"`,
+>>>>>>> 1a4b379 (3)
         `"${cleanReason}"`,
         `"${cleanNote}"`,
         `"${tx.awardedByName}"`,
@@ -507,11 +534,19 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
                 </h1>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<<<<<<< HEAD
                   Cloud Firestore Realtime
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 Theo dõi chi tiết các lượt cộng điểm và nhắc nhở trừ điểm của Lớp A11K65 (Đồng bộ tức thì)
+=======
+                  Đồng bộ máy chủ
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Theo dõi chi tiết các lượt cộng điểm và nhắc nhở trừ điểm của Lớp A11K65
+>>>>>>> 1a4b379 (3)
               </p>
             </div>
           </div>
@@ -633,14 +668,22 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
           </div>
           <div>
             <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+<<<<<<< HEAD
               BẢNG LƯU TÁC ĐỘNG CỦA BAN CÁN SỰ LỚP (REALTIME CLOUD FIRESTORE)
+=======
+              BẢNG LƯU TÁC ĐỘNG CỦA BAN CÁN SỰ LỚP
+>>>>>>> 1a4b379 (3)
               <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                 Đang trực tuyến
               </span>
             </h4>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+<<<<<<< HEAD
               Mỗi khi <strong>Lớp trưởng</strong> hoặc <strong>Tổ trưởng</strong> chấm điểm, cộng điểm tiến bộ hoặc nhắc nhở trừ điểm trên thiết bị của họ, dữ liệu được gửi ngay vào <strong>Cloud Firestore</strong> và tự động nhảy kết quả lên máy Giáo viên theo thời gian thực mà không cần bấm tải lại trang (F5).
+=======
+              Dữ liệu được lưu tập trung qua máy chủ và tự động làm mới định kỳ để cập nhật hoạt động mới nhất.
+>>>>>>> 1a4b379 (3)
             </p>
           </div>
         </div>
@@ -957,12 +1000,21 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
                   return (
                     <tr
                       key={tx.id}
+<<<<<<< HEAD
                       className={`transition-colors ${
                         isSelected
                           ? 'bg-slate-100/70'
                           : isPositive
                           ? 'hover:bg-emerald-50/40'
                           : 'hover:bg-amber-50/40'
+=======
+                      className={`activity-history-row transition-colors ${
+                        isSelected
+                          ? 'activity-history-row--selected bg-slate-100/70'
+                          : isPositive
+                          ? 'activity-history-row--positive hover:bg-emerald-50/40'
+                          : 'activity-history-row--negative hover:bg-amber-50/40'
+>>>>>>> 1a4b379 (3)
                       }`}
                     >
                       {/* Teacher checkbox */}
@@ -1020,7 +1072,11 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
                               : 'bg-amber-50 text-amber-800 border-amber-200'
                           }`}
                         >
+<<<<<<< HEAD
                           {isPositive ? `+${tx.points}` : tx.points} đ
+=======
+                          {formatSignedPoints(tx.points)} đ
+>>>>>>> 1a4b379 (3)
                         </span>
                       </td>
 
@@ -1082,7 +1138,11 @@ export const ActivityHistoryPage: React.FC<ActivityHistoryPageProps> = ({
             <p className="text-xs text-slate-600 leading-relaxed">
               Bạn có chắc chắn muốn xóa bản ghi của học sinh{' '}
               <strong className="text-slate-900">{deleteTargetTx.studentName}</strong> (
+<<<<<<< HEAD
               {deleteTargetTx.points > 0 ? `+${deleteTargetTx.points}` : deleteTargetTx.points} đ -{' '}
+=======
+              {formatSignedPoints(deleteTargetTx.points)} đ -{' '}
+>>>>>>> 1a4b379 (3)
               {deleteTargetTx.actionName})?
             </p>
 

@@ -39,6 +39,7 @@ import {
   FileText,
   ArrowRight,
 } from 'lucide-react';
+<<<<<<< HEAD
 import {
   subscribeToTransactions,
   syncStudentToFirestore,
@@ -46,6 +47,10 @@ import {
   deleteStudentFromFirestore,
 } from '../services/firestoreSync';
 import { ImportRosterModal } from './ImportRosterModal';
+=======
+import { ImportRosterModal } from './ImportRosterModal';
+import { formatSignedPoints } from '../utils/formatPoints';
+>>>>>>> 1a4b379 (3)
 
 interface TeacherDashboardProps {
   session: AuthSession;
@@ -105,9 +110,12 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   const [quickAddSuccessMsg, setQuickAddSuccessMsg] = useState<string | null>(null);
   const [quickAddErrorMsg, setQuickAddErrorMsg] = useState<string | null>(null);
 
+<<<<<<< HEAD
   // Cloud Firestore Sync & Import states
   const [isSyncingFirestore, setIsSyncingFirestore] = useState<boolean>(false);
   const [firestoreSyncMsg, setFirestoreSyncMsg] = useState<{ text: string; isError: boolean } | null>(null);
+=======
+>>>>>>> 1a4b379 (3)
   const [showImportModal, setShowImportModal] = useState<boolean>(false);
 
   // Add Student modal
@@ -150,7 +158,13 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
     try {
       const [statsRes, txRes] = await Promise.all([
         fetch('/api/stats', { headers: { Authorization: `Bearer ${session.token}` } }),
+<<<<<<< HEAD
         fetch('/api/transactions/recent', { credentials: 'include' }),
+=======
+        fetch('/api/transactions/recent', {
+          headers: { Authorization: `Bearer ${session.token}` },
+        }),
+>>>>>>> 1a4b379 (3)
       ]);
       if (statsRes.ok) setStats(await statsRes.json());
       if (txRes.ok) setTransactions(await txRes.json());
@@ -163,6 +177,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
   useEffect(() => {
     fetchDashboardData();
+<<<<<<< HEAD
 
     // Realtime Cloud Firestore listener for transactions
     const unsubscribeTx = subscribeToTransactions((liveTx) => {
@@ -174,6 +189,10 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
     return () => {
       unsubscribeTx();
     };
+=======
+    const intervalId = window.setInterval(fetchDashboardData, 30000);
+    return () => window.clearInterval(intervalId);
+>>>>>>> 1a4b379 (3)
   }, [session.token]);
 
   // Handle Approve Transaction
@@ -264,6 +283,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       setQuickStudentName('');
       setQuickStudentCode('');
 
+<<<<<<< HEAD
       if (data.student) {
         try {
           await syncStudentToFirestore(data.student);
@@ -272,6 +292,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         }
       }
 
+=======
+>>>>>>> 1a4b379 (3)
       onRefreshData();
       fetchDashboardData();
       setTimeout(() => setQuickAddSuccessMsg(null), 4000);
@@ -302,6 +324,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       });
       const data = await res.json();
       if (res.ok) {
+<<<<<<< HEAD
         if (data.student) {
           try {
             await syncStudentToFirestore(data.student);
@@ -309,6 +332,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
             console.warn('[Firestore] create student sync warning:', fsErr);
           }
         }
+=======
+>>>>>>> 1a4b379 (3)
         setShowAddStudentModal(false);
         setNewStudentCode('');
         setNewStudentName('');
@@ -376,6 +401,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         throw new Error(data.error || 'Lỗi khi cập nhật học sinh.');
       }
 
+<<<<<<< HEAD
       // Sync to Cloud Firestore immediately
       try {
         await syncStudentToFirestore({
@@ -392,6 +418,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         console.warn('[Firestore] sync student on edit warning:', fsErr);
       }
 
+=======
+>>>>>>> 1a4b379 (3)
       setEditingStudent(null);
       onRefreshData();
       fetchDashboardData();
@@ -418,11 +446,14 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         headers: { Authorization: `Bearer ${session.token}` },
       });
       if (res.ok) {
+<<<<<<< HEAD
         try {
           await deleteStudentFromFirestore(editingStudent.id);
         } catch (fsErr) {
           console.warn('[Firestore] delete student warning:', fsErr);
         }
+=======
+>>>>>>> 1a4b379 (3)
         setEditingStudent(null);
         onRefreshData();
         fetchDashboardData();
@@ -447,11 +478,14 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         body: JSON.stringify({ newTeamId: targetTeamId }),
       });
       if (res.ok) {
+<<<<<<< HEAD
         try {
           await syncStudentToFirestore({ id: transferringStudent.id, teamId: targetTeamId });
         } catch (e) {
           console.warn(e);
         }
+=======
+>>>>>>> 1a4b379 (3)
         setTransferringStudent(null);
         onRefreshData();
       }
@@ -473,11 +507,14 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         body: JSON.stringify({ role: assignedRole, pin: assignedPin }),
       });
       if (res.ok) {
+<<<<<<< HEAD
         try {
           await syncStudentToFirestore({ id: assigningStudent.id, role: assignedRole as any });
         } catch (e) {
           console.warn(e);
         }
+=======
+>>>>>>> 1a4b379 (3)
         setAssigningStudent(null);
         setAssignedPin('');
         onRefreshData();
@@ -487,6 +524,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
     }
   };
 
+<<<<<<< HEAD
   // Handle Manual Sync of All Students to Cloud Firestore
   const handleSyncAllToFirestore = async () => {
     setIsSyncingFirestore(true);
@@ -522,6 +560,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       setIsSyncingFirestore(false);
     }
   };
+=======
+>>>>>>> 1a4b379 (3)
 
   // Handle Download sample CSV template
   const handleDownloadSampleCSV = () => {
@@ -722,7 +762,11 @@ HS04,Phạm Thu Dung,Tổ 4,Nữ`;
                       ? 'bg-amber-500 text-white shadow-xs'
                       : 'text-amber-800 hover:bg-amber-100/70'
                   }`}
+<<<<<<< HEAD
                   title="Bảng lưu tác động khi Ban cán sự lớp (Lớp trưởng & Tổ trưởng) chấm điểm - Realtime Cloud Firestore"
+=======
+                  title="Bảng lưu tác động điểm của ban cán sự lớp"
+>>>>>>> 1a4b379 (3)
                 >
                   <Zap className="w-3.5 h-3.5" />
                   <span>⚡ Bảng Tác Động Ban Cán Sự</span>
@@ -868,7 +912,11 @@ HS04,Phạm Thu Dung,Tổ 4,Nữ`;
                         </td>
                         <td className="py-3 px-3 text-right font-extrabold tabular-nums whitespace-nowrap">
                           <span className={tx.status === 'cancelled' ? 'line-through text-slate-400' : 'text-emerald-600'}>
+<<<<<<< HEAD
                             +{tx.points} đ
+=======
+                            {formatSignedPoints(tx.points)} đ
+>>>>>>> 1a4b379 (3)
                           </span>
                         </td>
                         <td className="py-3 px-3 whitespace-nowrap">

@@ -568,7 +568,11 @@ export const TeamStatsPage: React.FC<TeamStatsPageProps> = ({
               {teamMembers.map((student, idx) => {
                 const stage = getPlantStage(student.totalPoints);
                 return (
+<<<<<<< HEAD
                   <tr key={student.id} className="hover:bg-slate-50/80 transition-colors">
+=======
+                  <tr key={student.id} className="team-stats-student-row hover:bg-slate-50/80 transition-colors">
+>>>>>>> 1a4b379 (3)
                     <td className="py-3 px-4 text-center text-xs font-bold text-slate-400">
                       {idx + 1}
                     </td>

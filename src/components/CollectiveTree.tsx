@@ -46,6 +46,16 @@ export const CollectiveTree: React.FC<CollectiveTreeProps> = ({
               <circle cx="38" cy="28" r="14" fill="#6EE7B7" />
               <circle cx="62" cy="28" r="14" fill="#6EE7B7" />
               <circle cx="50" cy="18" r="12" fill="#A7F3D0" />
+<<<<<<< HEAD
+=======
+              <circle cx="25" cy="39" r="6" fill="#059669" />
+              <circle cx="39" cy="49" r="5" fill="#10B981" />
+              <circle cx="61" cy="48" r="6" fill="#059669" />
+              <circle cx="76" cy="38" r="5" fill="#10B981" />
+              <circle cx="43" cy="23" r="4" fill="#34D399" />
+              <circle cx="59" cy="25" r="4" fill="#34D399" />
+              <circle cx="51" cy="42" r="5" fill="#059669" />
+>>>>>>> 1a4b379 (3)
               {/* Flowers / Fruit accents */}
               <circle cx="45" cy="30" r="3" fill="#FDA4AF" />
               <circle cx="58" cy="34" r="3" fill="#FDA4AF" />

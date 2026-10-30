@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Student, Team, AuthSession } from '../types';
+<<<<<<< HEAD
 import { batchSyncStudentsToFirestore } from '../services/firestoreSync';
+=======
+>>>>>>> 1a4b379 (3)
 import {
   X,
   UploadCloud,
@@ -212,7 +215,11 @@ HS08,Trần Gia Bảo,Tổ 4,Nam`;
     return result;
   }, [textInput, autoDistributeTeams, defaultTeamId, teams, existingStudents, nextStudentStartNum]);
 
+<<<<<<< HEAD
   // Execute Import & Cloud Firestore Synchronization
+=======
+  // Import the roster through the authenticated application API.
+>>>>>>> 1a4b379 (3)
   const handleExecuteImport = async () => {
     if (parsedStudents.length === 0) {
       setErrorMsg('Chưa có học sinh nào được nhận diện từ dữ liệu nhập vào.');
@@ -246,6 +253,7 @@ HS08,Trần Gia Bảo,Tổ 4,Nam`;
         throw new Error(data.error || 'Có lỗi xảy ra khi lưu học sinh trên máy chủ.');
       }
 
+<<<<<<< HEAD
       // 2. Direct client-side batch synchronization to Cloud Firestore
       // Re-fetch latest roster and push to Firestore
       try {
@@ -258,6 +266,8 @@ HS08,Trần Gia Bảo,Tổ 4,Nam`;
         console.warn('[Firestore] Client batch sync fallback warning:', fsErr);
       }
 
+=======
+>>>>>>> 1a4b379 (3)
       // Trigger Confetti
       confetti({
         particleCount: 70,
@@ -266,9 +276,15 @@ HS08,Trần Gia Bảo,Tổ 4,Nam`;
       });
 
       setSuccessInfo(
+<<<<<<< HEAD
         `Đã kết nối và cập nhật thành công ${data.addedCount || 0} học sinh mới và ${
           data.updatedCount || 0
         } học sinh vào Cloud Firestore!`
+=======
+        `Đã cập nhật thành công ${data.addedCount || 0} học sinh mới và ${
+          data.updatedCount || 0
+        } học sinh.`
+>>>>>>> 1a4b379 (3)
       );
 
       onSuccess();
@@ -306,7 +322,11 @@ HS08,Trần Gia Bảo,Tổ 4,Nam`;
               <Sparkles className="w-4 h-4 text-amber-500" />
             </h3>
             <p className="text-xs text-slate-500">
+<<<<<<< HEAD
               Nhập danh sách học sinh từ Excel, CSV hoặc dán văn bản. Tự động đồng bộ thời gian thực lên Cloud Firestore.
+=======
+              Nhập danh sách học sinh từ Excel, CSV hoặc dán văn bản. Dữ liệu được lưu qua máy chủ.
+>>>>>>> 1a4b379 (3)
             </p>
           </div>
         </div>
@@ -330,7 +350,11 @@ HS08,Trần Gia Bảo,Tổ 4,Nam`;
         <div className="mb-4 p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<<<<<<< HEAD
             <span className="font-bold text-slate-700">Cloud Firestore: Đang kết nối trực tiếp</span>
+=======
+            <span className="font-bold text-slate-700">Dữ liệu được lưu an toàn qua máy chủ</span>
+>>>>>>> 1a4b379 (3)
           </div>
           <button
             type="button"
@@ -521,12 +545,20 @@ HS02, Trần Thị Bình, Tổ 2, Nữ`}
             {isLoading ? (
               <>
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+<<<<<<< HEAD
                 <span>Đang kết nối Cloud Firestore...</span>
+=======
+                <span>Đang lưu danh sách...</span>
+>>>>>>> 1a4b379 (3)
               </>
             ) : (
               <>
                 <Database className="w-4 h-4" />
+<<<<<<< HEAD
                 <span>Cập nhật {parsedStudents.length} học sinh vào Cloud Firestore</span>
+=======
+                <span>Cập nhật {parsedStudents.length} học sinh</span>
+>>>>>>> 1a4b379 (3)
                 <ArrowRight className="w-3.5 h-3.5" />
               </>
             )}

@@ -52,6 +52,10 @@ export interface PointTransaction {
   points: number;
   note?: string;
   status: TransactionStatus;
+<<<<<<< HEAD
+=======
+  approvedByRole?: 'teacher';
+>>>>>>> 1a4b379 (3)
   cancelReason?: string;
   cancelledBy?: string;
   cancelledAt?: string;
@@ -118,7 +122,11 @@ export interface AppSettings {
 
 export interface AuthSession {
   token: string;
+<<<<<<< HEAD
   role: 'teacher' | 'class_president' | 'team_leader';
+=======
+  role: 'teacher' | 'class_president' | 'team_leader' | 'student';
+>>>>>>> 1a4b379 (3)
   name: string;
   studentId?: string;
   studentCode?: string;
@@ -126,6 +134,63 @@ export interface AuthSession {
   teamName?: string;
 }
 
+<<<<<<< HEAD
+=======
+export interface WeeklyChallenge {
+  id: string;
+  title: string;
+  description: string;
+  targetPoints: number;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+}
+
+export interface ClassEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  createdAt: string;
+}
+
+export interface StudentGoal {
+  id: string;
+  studentId: string;
+  studentName: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudentGratitude {
+  id: string;
+  senderStudentId: string;
+  senderName: string;
+  recipientStudentId: string;
+  recipientName: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface PlantReward {
+  id: string;
+  studentId: string;
+  studentName: string;
+  itemName: string;
+  icon: string;
+  note: string;
+  grantedBy: string;
+  createdAt: string;
+}
+
+export interface StudentStreak {
+  studentId: string;
+  studentName: string;
+  days: number;
+}
+
+>>>>>>> 1a4b379 (3)
 export interface AuditLog {
   id: string;
   action: string;
@@ -136,4 +201,7 @@ export interface AuditLog {
   afterContent?: any;
   timestamp: string;
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1a4b379 (3)

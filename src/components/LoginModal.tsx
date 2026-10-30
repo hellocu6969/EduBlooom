@@ -13,11 +13,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onLoginSuccess,
   staffList,
 }) => {
+<<<<<<< HEAD
   const [tab, setTab] = useState<'teacher' | 'staff'>('teacher');
+=======
+  const [tab, setTab] = useState<'teacher' | 'staff' | 'student'>('teacher');
+>>>>>>> 1a4b379 (3)
 
   const [teacherPassword, setTeacherPassword] = useState('');
   const [selectedStaffCode, setSelectedStaffCode] = useState(staffList[0]?.code || '');
   const [staffPin, setStaffPin] = useState('');
+<<<<<<< HEAD
+=======
+  const [studentCode, setStudentCode] = useState('');
+  const [studentPin, setStudentPin] = useState('');
+>>>>>>> 1a4b379 (3)
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -85,6 +94,34 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
+<<<<<<< HEAD
+=======
+  const handleStudentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!studentCode.trim() || !studentPin.trim()) {
+      setErrorMsg('Vui lòng nhập mã học sinh và PIN.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch('/api/auth/student-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentCode, pin: studentPin }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Không thể đăng nhập học sinh.');
+      onLoginSuccess(data);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Lỗi đăng nhập học sinh.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+>>>>>>> 1a4b379 (3)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-emerald-100 flex flex-col relative">
@@ -114,14 +151,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               setTab('teacher');
               setErrorMsg(null);
             }}
+<<<<<<< HEAD
             className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+=======
+            className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
+>>>>>>> 1a4b379 (3)
               tab === 'teacher'
                 ? 'bg-white text-emerald-800 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
+<<<<<<< HEAD
             <span>Giáo viên chủ nhiệm</span>
+=======
+            <span>Giáo viên</span>
+>>>>>>> 1a4b379 (3)
           </button>
 
           <button
@@ -130,14 +175,37 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               setTab('staff');
               setErrorMsg(null);
             }}
+<<<<<<< HEAD
             className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+=======
+            className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
+>>>>>>> 1a4b379 (3)
               tab === 'staff'
                 ? 'bg-white text-emerald-800 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
+<<<<<<< HEAD
             <span>Ban cán sự lớp</span>
+=======
+            <span>Cán sự</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTab('student');
+              setErrorMsg(null);
+            }}
+            className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${
+              tab === 'student'
+                ? 'bg-white text-emerald-800 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Học sinh</span>
+>>>>>>> 1a4b379 (3)
           </button>
         </div>
 
@@ -225,6 +293,47 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             </button>
           </form>
         )}
+<<<<<<< HEAD
+=======
+
+        {tab === 'student' && (
+          <form onSubmit={handleStudentSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Mã học sinh:</label>
+              <input
+                autoComplete="username"
+                value={studentCode}
+                onChange={(event) => setStudentCode(event.target.value.toUpperCase())}
+                placeholder="Ví dụ: HS01"
+                className="w-full p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">PIN đăng nhập:</label>
+              <input
+                type="password"
+                inputMode="numeric"
+                autoComplete="current-password"
+                maxLength={6}
+                value={studentPin}
+                onChange={(event) => setStudentPin(event.target.value.replace(/\D/g, ''))}
+                placeholder="Nhập PIN do giáo viên cung cấp"
+                className="w-full p-3 text-sm font-mono tracking-widest bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
+              />
+            </div>
+            <p className="text-xs text-slate-500">
+              Sau khi đăng nhập, em có thể đổi sang PIN riêng trong mục Góc Tử Tế.
+            </p>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition disabled:opacity-50"
+            >
+              {loading ? 'Đang xác thực...' : 'Đăng nhập học sinh'}
+            </button>
+          </form>
+        )}
+>>>>>>> 1a4b379 (3)
       </div>
     </div>
   );

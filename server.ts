@@ -1,9 +1,15 @@
+<<<<<<< HEAD
+=======
+import 'dotenv/config';
+import 'express-async-errors';
+>>>>>>> 1a4b379 (3)
 import express, { Request, Response, NextFunction } from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+<<<<<<< HEAD
 import { initializeApp as initFirebaseServerApp } from 'firebase/app';
 import {
   getFirestore as getFirebaseServerFirestore,
@@ -12,6 +18,13 @@ import {
   deleteDoc as fsDeleteDoc,
   writeBatch as fsWriteBatch,
 } from 'firebase/firestore';
+=======
+import {
+  exportFirestoreDatabase,
+  loadFirestoreDatabase,
+  saveFirestoreDatabase,
+} from './server/firestoreStore';
+>>>>>>> 1a4b379 (3)
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -19,6 +32,13 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+<<<<<<< HEAD
+=======
+app.use('/api', (_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+>>>>>>> 1a4b379 (3)
 
 // Ensure data folder exists
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -34,6 +54,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 app.use('/uploads', express.static(UPLOADS_DIR));
 
+<<<<<<< HEAD
 // Initialize Cloud Firestore on server
 let firestoreDB: any = null;
 try {
@@ -159,6 +180,8 @@ async function syncAllStudentsToFirestore(students: any[]) {
   }
 }
 
+=======
+>>>>>>> 1a4b379 (3)
 // ================= INITIAL SEED DATA =================
 function getInitialData() {
   const salt = bcrypt.genSaltSync(10);
@@ -403,6 +426,7 @@ function getInitialData() {
   };
 }
 
+<<<<<<< HEAD
 // Persistent database read/write
 function readDB() {
   let db: any;
@@ -418,6 +442,10 @@ function readDB() {
     }
   }
 
+=======
+// Normalize legacy data after loading it from the configured source of truth.
+function normalizeDatabase(db: any): { database: any; changed: boolean } {
+>>>>>>> 1a4b379 (3)
   let changed = false;
 
   // Auto-migration: Ensure deduction actions exist
@@ -635,6 +663,7 @@ function readDB() {
     changed = true;
   }
 
+<<<<<<< HEAD
   if (changed) {
     writeDB(db);
   }
@@ -642,18 +671,214 @@ function readDB() {
 }
 
 function writeDB(data: any) {
+=======
+  return { database: db, changed };
+}
+
+function ensureFeatureCollections(db: any): boolean {
+  let changed = false;
+  for (const name of [
+    'weeklyChallenges',
+    'classEvents',
+    'studentGoals',
+    'studentGratitude',
+    'plantRewards',
+  ]) {
+    if (!Array.isArray(db[name])) {
+      db[name] = [];
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+function assertDatabaseIntegrity(db: any): void {
+  const collectionNames = [
+    'teams',
+    'students',
+    'positiveActions',
+    'transactions',
+    'achievements',
+    'studentAchievements',
+    'personalMessages',
+    'auditLogs',
+    'weeklyChallenges',
+    'classEvents',
+    'studentGoals',
+    'studentGratitude',
+    'plantRewards',
+  ];
+  if (!db || typeof db !== 'object' || typeof db.teacherPasswordHash !== 'string' || !db.settings) {
+    throw new Error('Database metadata is missing or invalid.');
+  }
+  for (const collectionName of collectionNames) {
+    const records = db[collectionName];
+    if (!Array.isArray(records)) {
+      throw new Error(`Database collection "${collectionName}" is missing or invalid.`);
+    }
+    const ids = new Set<string>();
+    for (const record of records) {
+      if (!record || typeof record.id !== 'string' || !record.id.trim() || record.id.includes('/')) {
+        throw new Error(`Database collection "${collectionName}" contains an invalid document id.`);
+      }
+      if (ids.has(record.id)) {
+        throw new Error(`Database collection "${collectionName}" contains duplicate id "${record.id}".`);
+      }
+      ids.add(record.id);
+    }
+  }
+
+  const teamIds = new Set(db.teams.map((team: any) => team.id));
+  const studentIds = new Set<string>();
+  const studentCodes = new Set<string>();
+  for (const student of db.students) {
+    const code = String(student.code || '').trim().toUpperCase();
+    if (!code || studentCodes.has(code)) {
+      throw new Error(`Database contains an empty or duplicate student code "${code}".`);
+    }
+    if (!teamIds.has(student.teamId)) {
+      throw new Error(`Student "${student.id}" references missing team "${student.teamId}".`);
+    }
+    studentCodes.add(code);
+    studentIds.add(student.id);
+  }
+  for (const transaction of db.transactions) {
+    if (!studentIds.has(transaction.studentId) || !Number.isFinite(transaction.points)) {
+      throw new Error(`Transaction "${transaction.id}" has an invalid student reference or points value.`);
+    }
+    if (!['approved', 'pending', 'cancelled'].includes(transaction.status)) {
+      throw new Error(`Transaction "${transaction.id}" has an invalid status.`);
+    }
+  }
+}
+
+let databaseCache: any = null;
+let databaseInitialization: Promise<void> | null = null;
+
+function readJSONDatabase() {
+  if (!fs.existsSync(DB_FILE)) return getInitialData();
+  const raw = fs.readFileSync(DB_FILE, 'utf-8');
+  const database = JSON.parse(raw);
+  if (!database || typeof database !== 'object' || !Array.isArray(database.students)) {
+    throw new Error('data/database.json is invalid. The server will not overwrite the source data.');
+  }
+  return database;
+}
+
+function writeJSONDatabase(data: any) {
+>>>>>>> 1a4b379 (3)
   const tmpPath = `${DB_FILE}.tmp.${Date.now()}`;
   fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
   fs.renameSync(tmpPath, DB_FILE);
 }
 
+<<<<<<< HEAD
 // Ensure database file initialized
 readDB();
+=======
+async function initializeDatabase(): Promise<void> {
+  if (!databaseInitialization) {
+    databaseInitialization = (async () => {
+      const databaseBackend = isProduction ? 'firestore' : 'json';
+      const isFirstLocalRun = databaseBackend === 'json' && !fs.existsSync(DB_FILE);
+      const loaded = databaseBackend === 'firestore'
+        ? await loadFirestoreDatabase()
+        : readJSONDatabase();
+      const normalized = isFirstLocalRun
+        ? normalizeDatabase(loaded)
+        : { database: loaded, changed: false };
+      normalized.changed = ensureFeatureCollections(normalized.database) || normalized.changed;
+      assertDatabaseIntegrity(normalized.database);
+      databaseCache = normalized.database;
+
+      if (normalized.changed) {
+        if (databaseBackend === 'firestore') {
+          await saveFirestoreDatabase(loaded, databaseCache);
+        } else {
+          writeJSONDatabase(databaseCache);
+        }
+      } else if (databaseBackend === 'json' && !fs.existsSync(DB_FILE)) {
+        writeJSONDatabase(databaseCache);
+      }
+
+      console.log(`[Server] Database initialized using ${databaseBackend}.`);
+    })();
+  }
+  await databaseInitialization;
+}
+
+function readDB() {
+  if (!databaseCache) {
+    throw new Error('Database has not been initialized.');
+  }
+  return structuredClone(databaseCache);
+}
+
+let writeQueue = Promise.resolve();
+
+async function writeDB(data: any): Promise<void> {
+  const operation = writeQueue.then(async () => {
+    const previous = databaseCache;
+    if (!previous) throw new Error('Database has not been initialized.');
+
+    if (isProduction) {
+      await saveFirestoreDatabase(previous, data);
+    } else {
+      writeJSONDatabase(data);
+    }
+    databaseCache = structuredClone(data);
+  });
+  writeQueue = operation.catch((error) => {
+    console.error('[Database] Write failed:', error);
+  });
+  await operation;
+}
+
+app.use('/api', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    await initializeDatabase();
+    next();
+  } catch (error) {
+    console.error('[Database] Initialization failed:', error);
+    res.status(503).json({
+      error: 'Cơ sở dữ liệu chưa sẵn sàng. Vui lòng liên hệ quản trị viên.',
+    });
+  }
+});
+
+let mutationQueue = Promise.resolve();
+app.use('/api', async (req: Request, res: Response, next: NextFunction) => {
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    next();
+    return;
+  }
+
+  const previous = mutationQueue;
+  let release = () => {};
+  mutationQueue = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await previous;
+  let released = false;
+  const releaseOnce = () => {
+    if (released) return;
+    released = true;
+    release();
+  };
+  res.once('finish', releaseOnce);
+  res.once('close', releaseOnce);
+  next();
+});
+>>>>>>> 1a4b379 (3)
 
 // Active server sessions store
 interface SessionInfo {
   token: string;
+<<<<<<< HEAD
   role: 'teacher' | 'class_president' | 'team_leader';
+=======
+  role: 'teacher' | 'class_president' | 'team_leader' | 'student';
+>>>>>>> 1a4b379 (3)
   name: string;
   studentId?: string;
   studentCode?: string;
@@ -698,6 +923,12 @@ function authenticate(req: Request, res: Response, next: NextFunction) {
 }
 
 // ================= API ROUTES =================
+<<<<<<< HEAD
+=======
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({ ok: true, database: isProduction ? 'firestore' : 'json' });
+});
+>>>>>>> 1a4b379 (3)
 
 // 1. AUTHENTICATION
 
@@ -809,6 +1040,97 @@ app.post('/api/auth/staff-login', (req: Request, res: Response) => {
   });
 });
 
+<<<<<<< HEAD
+=======
+app.post('/api/auth/student-login', (req: Request, res: Response) => {
+  const { studentCode, pin } = req.body;
+  if (typeof studentCode !== 'string' || typeof pin !== 'string' || !studentCode.trim() || !pin.trim()) {
+    return res.status(400).json({ error: 'Vui lòng nhập mã học sinh và PIN.' });
+  }
+
+  const normalizedCode = studentCode.trim().toUpperCase();
+  const failureKey = `student:${normalizedCode}`;
+  const failure = pinFailures.get(failureKey);
+  if (failure && failure.lockedUntil > Date.now()) {
+    const remainingSec = Math.ceil((failure.lockedUntil - Date.now()) / 1000);
+    return res.status(429).json({
+      error: `Tài khoản tạm khóa do nhập sai PIN quá nhiều lần. Vui lòng thử lại sau ${remainingSec} giây.`,
+    });
+  }
+
+  const db = readDB();
+  const student = db.students.find(
+    (item: any) => item.code.toUpperCase() === normalizedCode && !item.isArchived
+  );
+  if (!student) return res.status(404).json({ error: 'Không tìm thấy học sinh với mã này.' });
+
+  const pinHash = student.studentPinHash || db.settings.studentInitialPinHash;
+  if (!pinHash) {
+    return res.status(403).json({ error: 'Giáo viên chưa thiết lập PIN đăng nhập học sinh.' });
+  }
+
+  if (!bcrypt.compareSync(pin.trim(), pinHash)) {
+    const currentCount = (failure?.count || 0) + 1;
+    const isLocked = currentCount >= 5;
+    pinFailures.set(failureKey, {
+      count: currentCount,
+      lockedUntil: isLocked ? Date.now() + 60000 : 0,
+    });
+    return res.status(401).json({
+      error: isLocked
+        ? 'Bạn đã nhập sai PIN 5 lần. Tài khoản bị tạm khóa 1 phút để bảo mật.'
+        : `Mã PIN chưa chính xác (còn ${5 - currentCount} lần thử).`,
+    });
+  }
+
+  pinFailures.delete(failureKey);
+  const token = generateToken();
+  const session: SessionInfo = {
+    token,
+    role: 'student',
+    name: student.name,
+    studentId: student.id,
+    studentCode: student.code,
+    teamId: student.teamId,
+    expiresAt: Date.now() + 12 * 60 * 60 * 1000,
+  };
+  activeSessions.set(token, session);
+  res.json({
+    token,
+    role: session.role,
+    name: session.name,
+    studentId: session.studentId,
+    studentCode: session.studentCode,
+    teamId: session.teamId,
+  });
+});
+
+app.post('/api/auth/change-student-pin', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'student' || !user.studentId) {
+    return res.status(403).json({ error: 'Chỉ học sinh đã đăng nhập mới được đổi PIN riêng.' });
+  }
+  const { currentPin, newPin } = req.body;
+  if (
+    typeof currentPin !== 'string' ||
+    typeof newPin !== 'string' ||
+    !/^\d{4,6}$/.test(newPin)
+  ) {
+    return res.status(400).json({ error: 'PIN mới phải gồm 4–6 chữ số.' });
+  }
+  const db = readDB();
+  const student = db.students.find((item: any) => item.id === user.studentId && !item.isArchived);
+  if (!student) return res.status(404).json({ error: 'Không tìm thấy tài khoản học sinh.' });
+  const currentHash = student.studentPinHash || db.settings.studentInitialPinHash;
+  if (!currentHash || !bcrypt.compareSync(currentPin, currentHash)) {
+    return res.status(401).json({ error: 'PIN hiện tại chưa chính xác.' });
+  }
+  student.studentPinHash = bcrypt.hashSync(newPin, 10);
+  await writeDB(db);
+  res.json({ success: true, message: 'Đã đổi PIN riêng thành công.' });
+});
+
+>>>>>>> 1a4b379 (3)
 // Check current session
 app.get('/api/auth/me', authenticate, (req: Request, res: Response) => {
   const user = (req as any).user as SessionInfo;
@@ -817,9 +1139,20 @@ app.get('/api/auth/me', authenticate, (req: Request, res: Response) => {
   // If student staff, recheck if role was revoked
   if (user.role !== 'teacher') {
     const student = db.students.find((s: any) => s.id === user.studentId && !s.isArchived);
+<<<<<<< HEAD
     if (!student || (student.role !== 'class_president' && student.role !== 'team_leader')) {
       activeSessions.delete(user.token);
       return res.status(401).json({ error: 'Quyền cán sự của bạn đã được giáo viên thu hồi.' });
+=======
+    if (
+      !student ||
+      (user.role !== 'student' &&
+        student.role !== 'class_president' &&
+        student.role !== 'team_leader')
+    ) {
+      activeSessions.delete(user.token);
+      return res.status(401).json({ error: 'Tài khoản hoặc quyền truy cập không còn hợp lệ.' });
+>>>>>>> 1a4b379 (3)
     }
   }
 
@@ -853,6 +1186,10 @@ app.get('/api/garden-data', (req: Request, res: Response) => {
       gender: s.gender,
       notes: s.notes,
       hasPin: !!s.pinHash,
+<<<<<<< HEAD
+=======
+      hasStudentPin: !!s.studentPinHash,
+>>>>>>> 1a4b379 (3)
       createdAt: s.createdAt,
     }));
 
@@ -867,6 +1204,10 @@ app.get('/api/garden-data', (req: Request, res: Response) => {
     settings: {
       ...db.settings,
       classAccessCode: undefined, // do not leak access code
+<<<<<<< HEAD
+=======
+      studentInitialPinHash: undefined,
+>>>>>>> 1a4b379 (3)
     },
     achievements: db.achievements,
     studentAchievements: db.studentAchievements,
@@ -875,6 +1216,282 @@ app.get('/api/garden-data', (req: Request, res: Response) => {
   });
 });
 
+<<<<<<< HEAD
+=======
+function dateInVietnam(time: string): string {
+  return new Date(time).toLocaleDateString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' });
+}
+
+app.get('/api/garden-features', (_req: Request, res: Response) => {
+  const db = readDB();
+  const activeStudents = db.students.filter((student: any) => !student.isArchived);
+  const streaks = activeStudents.map((student: any) => {
+    const activeDays = new Set<string>(
+      db.transactions
+        .filter(
+          (transaction: any) =>
+            transaction.studentId === student.id &&
+            transaction.status === 'approved' &&
+            (transaction.awardedByRole === 'teacher' || transaction.approvedByRole === 'teacher')
+        )
+        .map((transaction: any) => dateInVietnam(transaction.approvedAt || transaction.createdAt))
+    );
+    let cursor = new Date(`${dateInVietnam(new Date().toISOString())}T12:00:00Z`);
+    const today = cursor.toISOString().slice(0, 10);
+    if (!activeDays.has(today)) cursor.setUTCDate(cursor.getUTCDate() - 1);
+    let days = 0;
+    while (activeDays.has(cursor.toISOString().slice(0, 10))) {
+      days += 1;
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+    }
+    return { studentId: student.id, studentName: student.name, days };
+  });
+
+  const challenges = db.weeklyChallenges.map((challenge: any) => {
+    const points = db.transactions
+      .filter((transaction: any) => {
+        const day = dateInVietnam(transaction.approvedAt || transaction.createdAt);
+        return (
+          transaction.status === 'approved' &&
+          transaction.points > 0 &&
+          day >= challenge.startDate &&
+          day <= challenge.endDate
+        );
+      })
+      .reduce((sum: number, transaction: any) => sum + transaction.points, 0);
+    return { ...challenge, currentPoints: points };
+  });
+
+  res.json({
+    challenges,
+    events: db.classEvents,
+    goals: db.studentGoals,
+    gratitude: db.studentGratitude,
+    rewards: db.plantRewards,
+    streaks: streaks.filter((item: any) => item.days > 0).sort((a: any, b: any) => b.days - a.days),
+    hasStudentInitialPin: Boolean(db.settings.studentInitialPinHash),
+  });
+});
+
+app.put('/api/settings/student-initial-pin', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'teacher') {
+    return res.status(403).json({ error: 'Chỉ giáo viên mới được cài đặt PIN chung cho học sinh.' });
+  }
+  const { pin } = req.body;
+  if (typeof pin !== 'string' || !/^\d{4,6}$/.test(pin)) {
+    return res.status(400).json({ error: 'PIN chung phải gồm 4–6 chữ số.' });
+  }
+  const db = readDB();
+  db.settings.studentInitialPinHash = bcrypt.hashSync(pin, 10);
+  await writeDB(db);
+  res.json({ success: true });
+});
+
+app.post('/api/garden-features/challenges', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'teacher') return res.status(403).json({ error: 'Chỉ giáo viên được tạo thử thách.' });
+  const { title, description = '', targetPoints, startDate, endDate } = req.body;
+  if (
+    typeof title !== 'string' ||
+    !title.trim() ||
+    !Number.isFinite(Number(targetPoints)) ||
+    Number(targetPoints) <= 0 ||
+    typeof startDate !== 'string' ||
+    typeof endDate !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(endDate) ||
+    endDate < startDate
+  ) {
+    return res.status(400).json({ error: 'Vui lòng nhập tên, mục tiêu điểm và khoảng ngày hợp lệ.' });
+  }
+  const db = readDB();
+  const challenge = {
+    id: `challenge-${crypto.randomUUID()}`,
+    title: title.trim().slice(0, 120),
+    description: String(description).trim().slice(0, 500),
+    targetPoints: Number(targetPoints),
+    startDate,
+    endDate,
+    createdAt: new Date().toISOString(),
+  };
+  db.weeklyChallenges.unshift(challenge);
+  await writeDB(db);
+  res.status(201).json(challenge);
+});
+
+app.delete('/api/garden-features/challenges/:id', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'teacher') return res.status(403).json({ error: 'Chỉ giáo viên được xóa thử thách.' });
+  const db = readDB();
+  const initialLength = db.weeklyChallenges.length;
+  db.weeklyChallenges = db.weeklyChallenges.filter((item: any) => item.id !== req.params.id);
+  if (db.weeklyChallenges.length === initialLength) return res.status(404).json({ error: 'Không tìm thấy thử thách.' });
+  await writeDB(db);
+  res.json({ success: true });
+});
+
+app.post('/api/garden-features/events', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'teacher') return res.status(403).json({ error: 'Chỉ giáo viên được tạo sự kiện.' });
+  const { title, description = '', date } = req.body;
+  if (typeof title !== 'string' || !title.trim() || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res.status(400).json({ error: 'Vui lòng nhập tên và ngày sự kiện hợp lệ.' });
+  }
+  const db = readDB();
+  const event = {
+    id: `event-${crypto.randomUUID()}`,
+    title: title.trim().slice(0, 120),
+    description: String(description).trim().slice(0, 500),
+    date,
+    createdAt: new Date().toISOString(),
+  };
+  db.classEvents.push(event);
+  await writeDB(db);
+  res.status(201).json(event);
+});
+
+app.delete('/api/garden-features/events/:id', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'teacher') return res.status(403).json({ error: 'Chỉ giáo viên được xóa sự kiện.' });
+  const db = readDB();
+  const initialLength = db.classEvents.length;
+  db.classEvents = db.classEvents.filter((item: any) => item.id !== req.params.id);
+  if (db.classEvents.length === initialLength) return res.status(404).json({ error: 'Không tìm thấy sự kiện.' });
+  await writeDB(db);
+  res.json({ success: true });
+});
+
+app.post('/api/garden-features/goals', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  const { studentId, title } = req.body;
+  const targetId = user.role === 'teacher' ? studentId : user.studentId;
+  if (user.role !== 'teacher' && user.role !== 'student') {
+    return res.status(403).json({ error: 'Chỉ học sinh và giáo viên được cập nhật mục tiêu.' });
+  }
+  if (typeof targetId !== 'string' || typeof title !== 'string' || !title.trim()) {
+    return res.status(400).json({ error: 'Vui lòng nhập nội dung mục tiêu.' });
+  }
+  const db = readDB();
+  const student = db.students.find((item: any) => item.id === targetId && !item.isArchived);
+  if (!student) return res.status(404).json({ error: 'Không tìm thấy học sinh.' });
+  const existing = db.studentGoals.find((item: any) => item.studentId === targetId);
+  const goal = {
+    id: existing?.id || `goal-${crypto.randomUUID()}`,
+    studentId: targetId,
+    studentName: student.name,
+    title: title.trim().slice(0, 240),
+    createdAt: existing?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  if (existing) Object.assign(existing, goal);
+  else db.studentGoals.unshift(goal);
+  await writeDB(db);
+  res.status(existing ? 200 : 201).json(goal);
+});
+
+app.delete('/api/garden-features/goals/:id', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  const db = readDB();
+  const goal = db.studentGoals.find((item: any) => item.id === req.params.id);
+  if (!goal) return res.status(404).json({ error: 'Không tìm thấy mục tiêu.' });
+  if (user.role !== 'teacher' && (user.role !== 'student' || user.studentId !== goal.studentId)) {
+    return res.status(403).json({ error: 'Bạn chỉ được xóa mục tiêu của chính mình.' });
+  }
+  db.studentGoals = db.studentGoals.filter((item: any) => item.id !== goal.id);
+  await writeDB(db);
+  res.json({ success: true });
+});
+
+app.post('/api/garden-features/gratitude', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'student' || !user.studentId) {
+    return res.status(403).json({ error: 'Chỉ học sinh đã đăng nhập mới được gửi lời cảm ơn.' });
+  }
+  const { recipientStudentId, message } = req.body;
+  if (typeof recipientStudentId !== 'string' || typeof message !== 'string' || !message.trim() || message.trim().length > 500) {
+    return res.status(400).json({ error: 'Lời cảm ơn cần có nội dung tối đa 500 ký tự.' });
+  }
+  const db = readDB();
+  const sender = db.students.find((item: any) => item.id === user.studentId && !item.isArchived);
+  const recipient = db.students.find((item: any) => item.id === recipientStudentId && !item.isArchived);
+  if (!sender || !recipient) return res.status(404).json({ error: 'Không tìm thấy người gửi hoặc người nhận.' });
+  const gratitude = {
+    id: `gratitude-${crypto.randomUUID()}`,
+    senderStudentId: sender.id,
+    senderName: sender.name,
+    recipientStudentId: recipient.id,
+    recipientName: recipient.name,
+    message: message.trim(),
+    createdAt: new Date().toISOString(),
+  };
+  db.studentGratitude.unshift(gratitude);
+  await writeDB(db);
+  res.status(201).json(gratitude);
+});
+
+app.post('/api/garden-features/rewards', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'teacher') return res.status(403).json({ error: 'Chỉ giáo viên được tặng vật phẩm.' });
+  const { studentId, itemName, icon = '🌸', note = '' } = req.body;
+  if (typeof studentId !== 'string' || typeof itemName !== 'string' || !itemName.trim()) {
+    return res.status(400).json({ error: 'Vui lòng chọn học sinh và nhập tên vật phẩm.' });
+  }
+  const db = readDB();
+  const student = db.students.find((item: any) => item.id === studentId && !item.isArchived);
+  if (!student) return res.status(404).json({ error: 'Không tìm thấy học sinh.' });
+  const reward = {
+    id: `reward-${crypto.randomUUID()}`,
+    studentId: student.id,
+    studentName: student.name,
+    itemName: itemName.trim().slice(0, 80),
+    icon: String(icon).slice(0, 8),
+    note: String(note).trim().slice(0, 240),
+    grantedBy: user.name,
+    createdAt: new Date().toISOString(),
+  };
+  db.plantRewards.unshift(reward);
+  await writeDB(db);
+  res.status(201).json(reward);
+});
+
+app.get('/api/reports/class', authenticate, (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  if (user.role !== 'teacher') return res.status(403).json({ error: 'Chỉ giáo viên được xem báo cáo phụ huynh.' });
+  const studentId = String(req.query.studentId || '');
+  const startDate = String(req.query.startDate || '');
+  const endDate = String(req.query.endDate || '');
+  if (!studentId || !/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate) || endDate < startDate) {
+    return res.status(400).json({ error: 'Vui lòng chọn học sinh và khoảng thời gian hợp lệ.' });
+  }
+  const db = readDB();
+  const student = db.students.find((item: any) => item.id === studentId && !item.isArchived);
+  if (!student) return res.status(404).json({ error: 'Không tìm thấy học sinh.' });
+  const transactions = db.transactions
+    .filter((item: any) => {
+      const date = dateInVietnam(item.approvedAt || item.createdAt);
+      return item.studentId === studentId && item.status !== 'cancelled' && date >= startDate && date <= endDate;
+    })
+    .sort((a: any, b: any) => a.createdAt.localeCompare(b.createdAt))
+    .map((item: any) => ({
+      date: dateInVietnam(item.approvedAt || item.createdAt),
+      actionName: item.actionName,
+      points: item.points,
+      status: item.status,
+      note: item.note || '',
+    }));
+  res.json({
+    student: { id: student.id, code: student.code, name: student.name },
+    startDate,
+    endDate,
+    totalPoints: transactions
+      .filter((item: any) => item.status === 'approved')
+      .reduce((sum: number, item: any) => sum + item.points, 0),
+    transactions,
+  });
+});
+
+>>>>>>> 1a4b379 (3)
 // 3. RECENT ACTIVITY & AUDIT LOGS
 app.get('/api/transactions/recent', (req: Request, res: Response) => {
   const db = readDB();
@@ -911,11 +1528,25 @@ app.get('/api/transactions/recent', (req: Request, res: Response) => {
 // 4. POINT TRANSACTIONS (CRITICAL PERMISSION ENFORCEMENT)
 const recentAwardLocks = new Set<string>();
 
+<<<<<<< HEAD
 app.post('/api/transactions/award', authenticate, (req: Request, res: Response) => {
   const user = (req as any).user as SessionInfo;
   const { studentId, actionId, note, idempotencyKey } = req.body;
 
   if (!studentId || !actionId) {
+=======
+app.post('/api/transactions/award', authenticate, async (req: Request, res: Response) => {
+  const user = (req as any).user as SessionInfo;
+  const { studentId, studentCode, actionId, note, idempotencyKey } = req.body;
+
+  if (
+    typeof studentId !== 'string' ||
+    !studentId ||
+    (studentCode !== undefined && (typeof studentCode !== 'string' || !studentCode)) ||
+    typeof actionId !== 'string' ||
+    !actionId
+  ) {
+>>>>>>> 1a4b379 (3)
     return res.status(400).json({ error: 'Thiếu thông tin học sinh hoặc hành động tốt.' });
   }
 
@@ -928,15 +1559,38 @@ app.post('/api/transactions/award', authenticate, (req: Request, res: Response) 
   setTimeout(() => recentAwardLocks.delete(lockKey), 4000);
 
   const db = readDB();
+<<<<<<< HEAD
   const targetStudent = db.students.find((s: any) => s.id === studentId && !s.isArchived);
   if (!targetStudent) {
     return res.status(404).json({ error: 'Không tìm thấy học sinh được cộng điểm.' });
   }
+=======
+  const matchingStudents = db.students.filter((s: any) => s.id === studentId);
+  if (matchingStudents.length > 1) {
+    return res.status(409).json({ error: 'Dữ liệu có mã học sinh bị trùng; giao dịch đã bị dừng.' });
+  }
+  const targetStudent = matchingStudents[0];
+  if (!targetStudent) {
+    return res.status(404).json({ error: 'Không tìm thấy học sinh được cộng điểm.' });
+  }
+  if (targetStudent.isArchived) {
+    return res.status(409).json({ error: 'Học sinh này đã được lưu trữ.' });
+  }
+  if (studentCode !== undefined && studentCode !== targetStudent.code) {
+    return res.status(409).json({ error: 'Mã học sinh đã thay đổi; hãy tải lại danh sách.' });
+  }
+>>>>>>> 1a4b379 (3)
 
   const action = db.positiveActions.find((a: any) => a.id === actionId && a.isActive);
   if (!action) {
     return res.status(404).json({ error: 'Hành động tốt này không hợp lệ hoặc đã bị tạm ẩn.' });
   }
+<<<<<<< HEAD
+=======
+  if (action.points < 0 && user.role !== 'teacher') {
+    return res.status(403).json({ error: 'Chỉ giáo viên mới được ghi nhận thao tác trừ điểm.' });
+  }
+>>>>>>> 1a4b379 (3)
 
   const targetTeam = db.teams.find((t: any) => t.id === targetStudent.teamId);
 
@@ -981,10 +1635,18 @@ app.post('/api/transactions/award', authenticate, (req: Request, res: Response) 
   const isPending = user.role !== 'teacher' && action.requiresApproval;
   const status = isPending ? 'pending' : 'approved';
 
+<<<<<<< HEAD
   const txId = `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   const newTx = {
     id: txId,
     studentId: targetStudent.id,
+=======
+  const txId = `tx-${crypto.randomUUID()}`;
+  const newTx = {
+    id: txId,
+    studentId: targetStudent.id,
+    studentCode: targetStudent.code,
+>>>>>>> 1a4b379 (3)
     studentName: targetStudent.name,
     teamIdAtTime: targetStudent.teamId,
     teamNameAtTime: targetTeam?.name || '',
@@ -996,6 +1658,10 @@ app.post('/api/transactions/award', authenticate, (req: Request, res: Response) 
     points: action.points,
     note: note ? String(note).trim() : '',
     status,
+<<<<<<< HEAD
+=======
+    approvedByRole: user.role === 'teacher' ? 'teacher' : undefined,
+>>>>>>> 1a4b379 (3)
     createdAt: new Date().toISOString(),
     approvedAt: status === 'approved' ? new Date().toISOString() : undefined,
   };
@@ -1006,8 +1672,12 @@ app.post('/api/transactions/award', authenticate, (req: Request, res: Response) 
     targetStudent.totalPoints = (targetStudent.totalPoints || 0) + action.points;
   }
 
+<<<<<<< HEAD
   writeDB(db);
   syncTransactionToFirestore(newTx, targetStudent);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
 
   const negativeMessage = action.points < 0
     ? `Cô Bùi Hằng đã nhắc nhở và trừ ${Math.abs(action.points)} điểm cho ${targetStudent.name} vì hành vi chưa tốt. Hãy rèn luyện thêm trong lần sau.`
@@ -1027,7 +1697,11 @@ app.post('/api/transactions/award', authenticate, (req: Request, res: Response) 
 });
 
 // Teacher: Approve pending transaction
+<<<<<<< HEAD
 app.post('/api/transactions/:id/approve', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/transactions/:id/approve', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền duyệt điểm.' });
@@ -1047,6 +1721,10 @@ app.post('/api/transactions/:id/approve', authenticate, (req: Request, res: Resp
 
   tx.status = 'approved';
   tx.approvedAt = new Date().toISOString();
+<<<<<<< HEAD
+=======
+  tx.approvedByRole = user.role;
+>>>>>>> 1a4b379 (3)
 
   // Add points to student
   const student = db.students.find((s: any) => s.id === tx.studentId);
@@ -1054,13 +1732,21 @@ app.post('/api/transactions/:id/approve', authenticate, (req: Request, res: Resp
     student.totalPoints = (student.totalPoints || 0) + tx.points;
   }
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
 
   res.json({ success: true, transaction: tx });
 });
 
 // Teacher: Cancel transaction with reason (recalculating points accurately)
+<<<<<<< HEAD
 app.post('/api/transactions/:id/cancel', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/transactions/:id/cancel', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền hủy giao dịch điểm.' });
@@ -1108,7 +1794,11 @@ app.post('/api/transactions/:id/cancel', authenticate, (req: Request, res: Respo
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
 
   res.json({ success: true, transaction: tx });
 });
@@ -1133,7 +1823,11 @@ app.get('/api/transactions/history', (req: Request, res: Response) => {
 });
 
 // Single transaction delete (Teacher only, with strict Audit Log)
+<<<<<<< HEAD
 app.delete('/api/transactions/:id', authenticate, (req: Request, res: Response) => {
+=======
+app.delete('/api/transactions/:id', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền xóa bản ghi lịch sử.' });
@@ -1169,13 +1863,21 @@ app.delete('/api/transactions/:id', authenticate, (req: Request, res: Response) 
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
   syncDeleteTransactionFromFirestore(id, student, db.auditLogs[0]);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, message: 'Đã xóa bản ghi thành công.' });
 });
 
 // Bulk delete transactions (Teacher only, with strict Audit Log)
+<<<<<<< HEAD
 app.post('/api/transactions/bulk-delete', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/transactions/bulk-delete', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền xóa các bản ghi lịch sử.' });
@@ -1213,12 +1915,20 @@ app.post('/api/transactions/bulk-delete', authenticate, (req: Request, res: Resp
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, count: deletedTxs.length, message: `Đã xóa ${deletedTxs.length} bản ghi thành công.` });
 });
 
 // Clear ALL transactions history (Teacher only, requires password + double confirmation)
+<<<<<<< HEAD
 app.post('/api/transactions/clear-all', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/transactions/clear-all', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền xóa toàn bộ lịch sử.' });
@@ -1259,7 +1969,11 @@ app.post('/api/transactions/clear-all', authenticate, (req: Request, res: Respon
     s.totalPoints = 0;
   }
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({
     success: true,
     message: 'Bạn sắp xóa toàn bộ lịch sử cộng và trừ điểm. Dữ liệu sau khi xóa sẽ không thể khôi phục nếu chưa sao lưu.',
@@ -1268,7 +1982,11 @@ app.post('/api/transactions/clear-all', authenticate, (req: Request, res: Respon
 });
 
 // Update/Adjust a transaction (Teacher only, logs before & after)
+<<<<<<< HEAD
 app.put('/api/transactions/:id', authenticate, (req: Request, res: Response) => {
+=======
+app.put('/api/transactions/:id', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên chủ nhiệm mới có quyền điều chỉnh bản ghi lịch sử.' });
@@ -1308,7 +2026,11 @@ app.put('/api/transactions/:id', authenticate, (req: Request, res: Response) => 
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, transaction: tx });
 });
 
@@ -1321,7 +2043,11 @@ app.get('/api/audit-logs', authenticate, (req: Request, res: Response) => {
   const db = readDB();
   res.json(db.auditLogs || []);
 });
+<<<<<<< HEAD
 app.post('/api/students', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/students', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được thêm học sinh.' });
@@ -1354,13 +2080,21 @@ app.post('/api/students', authenticate, (req: Request, res: Response) => {
   };
 
   db.students.push(newStudent);
+<<<<<<< HEAD
   writeDB(db);
   syncStudentToFirestore(newStudent);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
 
   res.json({ success: true, student: newStudent });
 });
 
+<<<<<<< HEAD
 app.put('/api/students/:id', authenticate, (req: Request, res: Response) => {
+=======
+app.put('/api/students/:id', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được cập nhật học sinh.' });
@@ -1407,13 +2141,21 @@ app.put('/api/students/:id', authenticate, (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
   syncStudentToFirestore(student);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, student });
 });
 
 // Delete / Archive student
+<<<<<<< HEAD
 app.delete('/api/students/:id', authenticate, (req: Request, res: Response) => {
+=======
+app.delete('/api/students/:id', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới có quyền xóa học sinh.' });
@@ -1443,13 +2185,21 @@ app.delete('/api/students/:id', authenticate, (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
   syncDeleteStudentFromFirestore(student.id);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, message: `Đã xóa học sinh ${student.name} khỏi danh sách.` });
 });
 
 // Transfer student team (preserving points and history!)
+<<<<<<< HEAD
 app.post('/api/students/:id/transfer-team', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/students/:id/transfer-team', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được chuyển tổ học sinh.' });
@@ -1489,13 +2239,21 @@ app.post('/api/students/:id/transfer-team', authenticate, (req: Request, res: Re
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
   syncStudentToFirestore(student);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, student });
 });
 
 // Role assignment & PIN management (Teacher only)
+<<<<<<< HEAD
 app.post('/api/students/:id/role', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/students/:id/role', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được phân quyền ban cán sự.' });
@@ -1553,8 +2311,12 @@ app.post('/api/students/:id/role', authenticate, (req: Request, res: Response) =
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
   syncStudentToFirestore(student);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
 
   res.json({
     success: true,
@@ -1570,7 +2332,11 @@ app.post('/api/students/:id/role', authenticate, (req: Request, res: Response) =
 });
 
 // Bulk import students from JSON (parsed from CSV/Excel)
+<<<<<<< HEAD
 app.post('/api/students/import', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/students/import', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được nhập danh sách học sinh.' });
@@ -1616,6 +2382,7 @@ app.post('/api/students/import', authenticate, (req: Request, res: Response) => 
     }
   }
 
+<<<<<<< HEAD
   writeDB(db);
   syncAllStudentsToFirestore(db.students);
   res.json({ success: true, addedCount, updatedCount });
@@ -1652,13 +2419,23 @@ app.post('/api/students/sync-firestore', authenticate, async (req: Request, res:
   });
 });
 
+=======
+  await writeDB(db);
+  res.json({ success: true, addedCount, updatedCount });
+});
+
+>>>>>>> 1a4b379 (3)
 // 6. TEAMS CRUD
 app.get('/api/teams', (req: Request, res: Response) => {
   const db = readDB();
   res.json(db.teams);
 });
 
+<<<<<<< HEAD
 app.put('/api/teams/:id', authenticate, (req: Request, res: Response) => {
+=======
+app.put('/api/teams/:id', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được sửa thông tin tổ.' });
@@ -1678,7 +2455,11 @@ app.put('/api/teams/:id', authenticate, (req: Request, res: Response) => {
   if (color) team.color = color;
   if (leaderStudentId !== undefined) team.leaderStudentId = leaderStudentId;
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, team });
 });
 
@@ -1688,7 +2469,11 @@ app.get('/api/actions', (req: Request, res: Response) => {
   res.json(db.positiveActions);
 });
 
+<<<<<<< HEAD
 app.post('/api/actions', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/actions', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được thêm hành động tốt.' });
@@ -1710,11 +2495,19 @@ app.post('/api/actions', authenticate, (req: Request, res: Response) => {
   };
 
   db.positiveActions.push(newAction);
+<<<<<<< HEAD
   writeDB(db);
   res.json({ success: true, action: newAction });
 });
 
 app.put('/api/actions/:id', authenticate, (req: Request, res: Response) => {
+=======
+  await writeDB(db);
+  res.json({ success: true, action: newAction });
+});
+
+app.put('/api/actions/:id', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được chỉnh sửa hành động tốt.' });
@@ -1734,12 +2527,20 @@ app.put('/api/actions/:id', authenticate, (req: Request, res: Response) => {
   if (requiresApproval !== undefined) action.requiresApproval = !!requiresApproval;
   if (isActive !== undefined) action.isActive = !!isActive;
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, action });
 });
 
 // 8. MESSAGES & ENCOURAGEMENTS
+<<<<<<< HEAD
 app.put('/api/messages/broadcast', authenticate, (req: Request, res: Response) => {
+=======
+app.put('/api/messages/broadcast', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được đổi lời nhắn chung.' });
@@ -1758,12 +2559,20 @@ app.put('/api/messages/broadcast', authenticate, (req: Request, res: Response) =
     createdAt: new Date().toISOString(),
   };
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, broadcastMessage: db.broadcastMessage });
 });
 
 // Personal message (public or private)
+<<<<<<< HEAD
 app.post('/api/messages/personal', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/messages/personal', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được gửi lời nhắn riêng.' });
@@ -1791,7 +2600,11 @@ app.post('/api/messages/personal', authenticate, (req: Request, res: Response) =
   };
 
   db.personalMessages.push(newMsg);
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
 
   res.json({ success: true, message: newMsg });
 });
@@ -1821,7 +2634,11 @@ app.get('/api/messages/student/:studentId', (req: Request, res: Response) => {
 });
 
 // 9. ACHIEVEMENTS AWARD
+<<<<<<< HEAD
 app.post('/api/achievements/award', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/achievements/award', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được trao danh hiệu.' });
@@ -1846,7 +2663,11 @@ app.post('/api/achievements/award', authenticate, (req: Request, res: Response) 
   };
 
   db.studentAchievements.push(newRecord);
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
 
   res.json({ success: true, studentAchievement: newRecord });
 });
@@ -1854,10 +2675,21 @@ app.post('/api/achievements/award', authenticate, (req: Request, res: Response) 
 // 10. APP SETTINGS & BRANDING
 app.get('/api/settings', (req: Request, res: Response) => {
   const db = readDB();
+<<<<<<< HEAD
   res.json(db.settings);
 });
 
 app.put('/api/settings', authenticate, (req: Request, res: Response) => {
+=======
+  res.json({
+    ...db.settings,
+    classAccessCode: undefined,
+    studentInitialPinHash: undefined,
+  });
+});
+
+app.put('/api/settings', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được thay đổi cài đặt giao diện.' });
@@ -1884,12 +2716,20 @@ app.put('/api/settings', authenticate, (req: Request, res: Response) => {
     }
   }
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, settings: db.settings });
 });
 
 // Change teacher master password
+<<<<<<< HEAD
 app.put('/api/settings/password', authenticate, (req: Request, res: Response) => {
+=======
+app.put('/api/settings/password', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới có quyền đổi mật khẩu quản trị.' });
@@ -1919,7 +2759,11 @@ app.put('/api/settings/password', authenticate, (req: Request, res: Response) =>
     timestamp: new Date().toISOString(),
   });
 
+<<<<<<< HEAD
   writeDB(db);
+=======
+  await writeDB(db);
+>>>>>>> 1a4b379 (3)
   res.json({ success: true, message: 'Đổi mật khẩu thành công.' });
 });
 
@@ -2014,13 +2858,18 @@ app.get('/api/backup/export', authenticate, (req: Request, res: Response) => {
   res.json(db);
 });
 
+<<<<<<< HEAD
 app.post('/api/backup/restore', authenticate, (req: Request, res: Response) => {
+=======
+app.post('/api/backup/restore', authenticate, async (req: Request, res: Response) => {
+>>>>>>> 1a4b379 (3)
   const user = (req as any).user as SessionInfo;
   if (user.role !== 'teacher') {
     return res.status(403).json({ error: 'Chỉ giáo viên mới được phục hồi dữ liệu.' });
   }
 
   const { backupData } = req.body;
+<<<<<<< HEAD
   if (!backupData || !backupData.students || !backupData.teams) {
     return res.status(400).json({ error: 'Tệp sao lưu không hợp lệ.' });
   }
@@ -2031,6 +2880,39 @@ app.post('/api/backup/restore', authenticate, (req: Request, res: Response) => {
 
 // ================= VITE DEV MIDDLEWARE OR STATIC SERVE =================
 async function startServer() {
+=======
+  if (
+    !backupData ||
+    !Array.isArray(backupData.students) ||
+    !Array.isArray(backupData.teams) ||
+    !Array.isArray(backupData.transactions)
+  ) {
+    return res.status(400).json({ error: 'Tệp sao lưu không hợp lệ.' });
+  }
+
+  try {
+    ensureFeatureCollections(backupData);
+    assertDatabaseIntegrity(backupData);
+  } catch (error) {
+    return res.status(400).json({
+      error: error instanceof Error ? `Tệp sao lưu không hợp lệ: ${error.message}` : 'Tệp sao lưu không hợp lệ.',
+    });
+  }
+
+  await writeDB(backupData);
+  res.json({ success: true, message: 'Phục hồi dữ liệu thành công.' });
+});
+
+app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[API] Unhandled request error:', error);
+  if (res.headersSent) return;
+  res.status(500).json({ error: 'Máy chủ không thể hoàn tất yêu cầu. Vui lòng thử lại.' });
+});
+
+// ================= VITE DEV MIDDLEWARE OR STATIC SERVE =================
+async function startServer() {
+  await initializeDatabase();
+>>>>>>> 1a4b379 (3)
   if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -2045,6 +2927,7 @@ async function startServer() {
     });
   }
 
+<<<<<<< HEAD
   if (!process.env.VERCEL) {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🌸 BLOOM TOGETHER – A11K65 server running on port ${PORT}`);
@@ -2059,5 +2942,16 @@ if (process.env.VERCEL) {
 } else {
   startServer();
 }
+=======
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🌸 BLOOM TOGETHER – A11K65 server running on port ${PORT}`);
+  });
+}
+
+startServer().catch((err) => {
+  console.error('[Server] Failed to initialize:', err);
+  process.exitCode = 1;
+});
+>>>>>>> 1a4b379 (3)
 
 export default app;

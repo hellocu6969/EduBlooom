@@ -45,8 +45,23 @@ export const StudentCard: React.FC<StudentCardProps> = ({
 
   return (
     <div
+<<<<<<< HEAD
       onClick={() => onViewDetails(student)}
       className="group relative bg-white/95 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-300 border border-emerald-100 flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+=======
+      role="button"
+      tabIndex={0}
+      aria-label={`Xem chậu cây của ${student.name}`}
+      onClick={() => onViewDetails(student)}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onViewDetails(student);
+        }
+      }}
+      className="student-plant-card group relative bg-white/95 rounded-2xl p-4 shadow-sm hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-all duration-300 border border-emerald-100 flex flex-col justify-between cursor-pointer hover:-translate-y-1"
+>>>>>>> 1a4b379 (3)
     >
       {/* Top Row: Code, Team, and Role Badge */}
       <div className="flex items-center justify-between gap-1 mb-2">

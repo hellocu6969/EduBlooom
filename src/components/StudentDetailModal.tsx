@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Student, Team, PointTransaction, Achievement, StudentAchievement, AuthSession } from '../types';
 import { PlantIllustration } from './PlantIllustration';
 import { getNextStageProgress } from '../utils/plantLevels';
+<<<<<<< HEAD
+=======
+import { formatSignedPoints } from '../utils/formatPoints';
+>>>>>>> 1a4b379 (3)
 import { X, Sprout, Heart, Award, Calendar, CheckCircle2, MessageSquare, Lock, Pencil, Check } from 'lucide-react';
 
 interface StudentDetailModalProps {
@@ -127,9 +131,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-fadeIn">
+<<<<<<< HEAD
       <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-100 flex flex-col">
         {/* Header Bar */}
         <div className="p-5 sm:p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-amber-50/40 border-b border-emerald-100 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
+=======
+      <div className="student-detail-modal bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-100 flex flex-col">
+        {/* Header Bar */}
+        <div className="student-detail-modal-header p-5 sm:p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-amber-50/40 border-b border-emerald-100 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
+>>>>>>> 1a4b379 (3)
           <div className="flex items-center gap-3">
             <span className="text-xs font-mono font-bold bg-white px-2.5 py-1 rounded-lg border border-emerald-200 text-slate-700">
               {student.code}
@@ -208,9 +218,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         {/* Modal Body */}
         <div className="p-5 sm:p-6 space-y-6">
           {/* Main Plant Showcase Box */}
+<<<<<<< HEAD
           <div className="bg-gradient-to-b from-emerald-50/50 to-slate-50/50 rounded-2xl p-6 border border-emerald-100 flex flex-col sm:flex-row items-center gap-6 justify-between">
             <div className="flex flex-col items-center text-center">
               <PlantIllustration level={currentStage.level} className="w-36 h-36 sm:w-44 sm:h-44" />
+=======
+          <div className="student-detail-plant-panel bg-gradient-to-b from-emerald-50/50 to-slate-50/50 rounded-2xl p-6 border border-emerald-100 flex flex-col sm:flex-row items-center gap-6 justify-between">
+            <div className="flex flex-col items-center text-center">
+              <PlantIllustration level={currentStage.level} isAnimating className="student-selected-plant w-36 h-36 sm:w-44 sm:h-44" />
+>>>>>>> 1a4b379 (3)
               <span className="mt-2 text-xs font-bold px-3 py-1 bg-emerald-600 text-white rounded-full shadow-sm">
                 Cấp {currentStage.level}: {currentStage.name}
               </span>
@@ -224,7 +240,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 </span>
               </div>
 
+<<<<<<< HEAD
               <p className="text-xs text-slate-600 leading-relaxed italic bg-white/80 p-3 rounded-xl border border-emerald-100">
+=======
+              <p className="student-detail-quote text-xs text-slate-600 leading-relaxed italic bg-white/80 p-3 rounded-xl border border-emerald-100">
+>>>>>>> 1a4b379 (3)
                 &ldquo;{currentStage.description}&rdquo;
               </p>
 
@@ -278,7 +298,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 {personalMessages.map((msg) => (
                   <div
                     key={msg.id}
+<<<<<<< HEAD
                     className={`p-3.5 rounded-xl border text-xs leading-relaxed ${
+=======
+                    className={`student-detail-message p-3.5 rounded-xl border text-xs leading-relaxed ${
+>>>>>>> 1a4b379 (3)
                       msg.isPrivate
                         ? 'bg-amber-50/70 border-amber-200 text-amber-900'
                         : 'bg-emerald-50/60 border-emerald-200 text-emerald-900'
@@ -302,7 +326,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 ))}
               </div>
             ) : (
+<<<<<<< HEAD
               <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 italic">
+=======
+              <div className="student-detail-quote p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 italic">
+>>>>>>> 1a4b379 (3)
                 {student.totalPoints >= 10
                   ? '“Cô rất vui vì mầm xanh của em đã nhú mầm tươi tốt! Hãy tiếp tục phát huy nhé!” — Cô Bùi Hằng'
                   : 'Mầm xanh của em đang đón nhận những giọt nước đầu tiên từ lòng tử tế và chăm chỉ! — Cô Bùi Hằng'}
@@ -321,7 +349,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                 {earnedAchievements.map((item) => (
                   <div
                     key={item.id}
+<<<<<<< HEAD
                     className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/80 flex items-center gap-3"
+=======
+                    className="student-detail-achievement p-3 bg-amber-50/50 rounded-xl border border-amber-200/80 flex items-center gap-3"
+>>>>>>> 1a4b379 (3)
                   >
                     <span className="text-2xl">{item.achievement?.icon || '🏆'}</span>
                     <div>
@@ -358,10 +390,17 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     key={tx.id}
                     className={`p-3 rounded-xl border flex items-start justify-between gap-3 text-xs ${
                       tx.status === 'cancelled'
+<<<<<<< HEAD
                         ? 'bg-rose-50/40 border-rose-200 opacity-60'
                         : tx.status === 'pending'
                         ? 'bg-amber-50/60 border-amber-200'
                         : 'bg-emerald-50/40 border-emerald-100'
+=======
+                        ? 'student-detail-transaction--cancelled bg-rose-50/40 border-rose-200 opacity-60'
+                        : tx.status === 'pending'
+                          ? 'student-detail-transaction--pending bg-amber-50/60 border-amber-200'
+                          : 'student-detail-transaction--approved bg-emerald-50/40 border-emerald-100'
+>>>>>>> 1a4b379 (3)
                     }`}
                   >
                     <div className="space-y-0.5">
@@ -398,7 +437,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                             : 'text-emerald-600'
                         }`}
                       >
+<<<<<<< HEAD
                         +{tx.points} đ
+=======
+                        {formatSignedPoints(tx.points)} đ
+>>>>>>> 1a4b379 (3)
                       </span>
                     </div>
                   </div>

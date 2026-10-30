@@ -14,7 +14,11 @@ export const Banner: React.FC<BannerProps> = ({
   isTeacher = false,
 }) => {
   return (
+<<<<<<< HEAD
     <div className="relative overflow-hidden rounded-3xl shadow-lg border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50/60 to-amber-50/50 mb-8">
+=======
+    <div className="garden-banner relative overflow-hidden rounded-3xl shadow-lg border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50/60 to-amber-50/50 mb-8">
+>>>>>>> 1a4b379 (3)
       {/* Background Custom image or subtle SVG illustration */}
       {settings.bannerBgUrl ? (
         <img
@@ -86,7 +90,11 @@ export const Banner: React.FC<BannerProps> = ({
           </div>
 
           <div className="relative inline-block">
+<<<<<<< HEAD
             <p className="text-xs sm:text-base font-medium italic text-slate-700 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-emerald-100 shadow-sm">
+=======
+            <p className="garden-banner-slogan text-xs sm:text-base font-medium italic text-slate-700 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-emerald-100 shadow-sm">
+>>>>>>> 1a4b379 (3)
               &ldquo;{settings.slogan || 'Mỗi việc tốt hôm nay – Một mầm xanh ngày mai!'}&rdquo;
             </p>
           </div>
@@ -116,7 +124,11 @@ export const Banner: React.FC<BannerProps> = ({
               />
             ) : (
               /* Default Teacher Gentle Illustrated Portrait Badge */
+<<<<<<< HEAD
               <div className="w-full h-full bg-gradient-to-br from-rose-100 to-amber-100 rounded-xl flex flex-col items-center justify-center text-center p-1">
+=======
+              <div className="garden-teacher-portrait w-full h-full bg-gradient-to-br from-rose-100 to-amber-100 rounded-xl flex flex-col items-center justify-center text-center p-1">
+>>>>>>> 1a4b379 (3)
                 <span className="text-3xl">👩‍🏫</span>
                 <span className="text-[10px] font-bold text-slate-700 mt-1 line-clamp-1">{settings.teacherName}</span>
               </div>
@@ -156,4 +168,7 @@ export const Banner: React.FC<BannerProps> = ({
     </div>
   );
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1a4b379 (3)

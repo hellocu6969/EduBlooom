@@ -4,15 +4,30 @@ interface PlantIllustrationProps {
   level: number;
   className?: string;
   isWatering?: boolean;
+<<<<<<< HEAD
+=======
+  isAnimating?: boolean;
+>>>>>>> 1a4b379 (3)
 }
 
 export const PlantIllustration: React.FC<PlantIllustrationProps> = ({
   level,
   className = 'w-36 h-36',
   isWatering = false,
+<<<<<<< HEAD
 }) => {
   return (
     <div className={`relative flex items-center justify-center select-none ${className}`}>
+=======
+  isAnimating = false,
+}) => {
+  return (
+    <div
+      className={`plant-artwork relative flex items-center justify-center select-none ${
+        isAnimating ? 'plant-artwork--continuous' : ''
+      } ${className}`}
+    >
+>>>>>>> 1a4b379 (3)
       {/* Soft radial glow for higher tiers */}
       {level >= 5 && (
         <div

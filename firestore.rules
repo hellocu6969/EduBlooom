@@ -1,6 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+<<<<<<< HEAD
     // Helper functions
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
@@ -50,6 +51,8 @@ service cloud.firestore {
     }
 
     // Default deny for unmatched documents
+=======
+>>>>>>> 1a4b379 (3)
     match /{document=**} {
       allow read, write: if false;
     }
