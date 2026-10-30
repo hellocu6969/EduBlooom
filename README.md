@@ -55,4 +55,46 @@ Do not run the confirmed command until the dry-run output and source JSON have b
 
 ## Deploy to Railway
 
-Use Node.js 22+, build with `npm run build`, and start with `npm start`. Add the Firestore secrets above and run one application replica. Deploy/restart the service only after the Firestore migration has completed and the health endpoint at `/api/health` reports the Firestore backend.
+Ứng dụng được deploy từ GitHub lên Railway; không cần chạy server trên máy cá nhân. Repository đã có lệnh `npm run build` và `npm start`.
+
+### 1. Chuẩn bị Firestore
+
+Production chỉ dùng Firestore và cố ý không tự chuyển sang `data/database.json` nếu Firestore trống.
+
+1. Tạo Firebase project và Firestore database.
+2. Tạo service account có quyền đọc/ghi dữ liệu Firestore (ví dụ role **Cloud Datastore User**) và tải JSON key. Không commit key này vào GitHub.
+3. Chạy migration **một lần** từ môi trường tin cậy có Node.js 22+, repository và file JSON key. Trong PowerShell:
+
+   ```powershell
+   npm ci
+   $env:FIREBASE_PROJECT_ID = "your-firebase-project-id"
+   $env:FIREBASE_SERVICE_ACCOUNT_JSON = Get-Content "C:\path\to\service-account.json" -Raw
+   npm run migrate:firestore -- --dry-run
+   npm run migrate:firestore -- --confirm-overwrite
+   ```
+
+   Chỉ chạy `--confirm-overwrite` sau khi đã kiểm tra số lượng dữ liệu của dry run. Migration tạo bản sao lưu Firestore trong `data/backups/`; giữ bản sao này ở nơi an toàn.
+
+### 2. Tạo Railway service
+
+1. Đẩy thay đổi lên GitHub, đăng nhập Railway và chọn **New Project → Deploy from GitHub repo**.
+2. Chọn `hellocu6969/EduBlooom`, giữ **Root Directory** là `/`.
+3. Trong **Settings → Build**, đặt **Build Command** là `npm run build`.
+4. Trong **Settings → Deploy**, đặt **Start Command** là `npm start`, **Healthcheck Path** là `/api/health`, và chỉ chạy **1 replica**.
+5. Trong **Variables**, thêm:
+   - `NODE_ENV` = `production`
+   - `FIREBASE_PROJECT_ID` = ID Firebase project
+   - `FIREBASE_SERVICE_ACCOUNT_JSON` = toàn bộ nội dung JSON key (dạng JSON hợp lệ; không thêm dấu ngoặc kép bao ngoài)
+   - `FIRESTORE_DATABASE_ID` = `(default)` nếu dùng database mặc định
+
+   Không cần tự đặt `PORT`; Railway cấp cổng động cho ứng dụng.
+
+### 3. Ảnh tải lên và xác nhận
+
+Nếu muốn giữ banner/logo/ảnh giáo viên sau mỗi lần deploy, vào **Settings → Volumes**, tạo volume và mount tại `/app/data` (nếu Root Directory vẫn là `/`). Dữ liệu ứng dụng chính được lưu trong Firestore; volume này chỉ cần cho tệp tải lên và bản sao lưu.
+
+Sau khi deploy, tạo domain Railway và mở `https://<domain>/api/health`. Kết quả phải có `"ok": true` và `"database": "firestore"`. Nếu deploy thất bại, kiểm tra **Deploy Logs** và xác nhận Firestore đã được migrate, biến môi trường hợp lệ, service account có quyền truy cập.
+
+### Lưu ý bảo mật dữ liệu
+
+`data/database.json` có thể chứa thông tin học sinh. Nếu đây là dữ liệu thật, hãy đặt repository ở chế độ private và rà soát lịch sử Git trước khi public hoặc chia sẻ repository. Xóa file trong commit mới không xóa dữ liệu khỏi các commit cũ. Không đưa service-account key hoặc bản sao lưu dữ liệu lên GitHub.
