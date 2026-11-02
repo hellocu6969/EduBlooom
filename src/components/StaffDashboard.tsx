@@ -41,6 +41,9 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
       // Class president can ONLY award to Team Leaders
       return s.role === 'team_leader';
     }
+    if (isTeamLeader) {
+      return s.teamId === session.teamId && s.role === 'student';
+    }
     return false;
   });
 
@@ -83,7 +86,7 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
             {isClassPresident &&
               'Hãy ghi nhận những đóng góp tích cực của các tổ trưởng và của chính mình nhé!'}
             {isTeamLeader &&
-              'Bạn chỉ có thể tự ghi nhận điểm cho chính mình.'}
+              `Bạn chỉ có thể tự ghi nhận điểm hoặc ghi nhận việc tốt của thành viên trong ${myTeam?.name ? myTeam.name.split('(')[0].trim() : 'tổ mình'}.`}
           </p>
         </div>
 
@@ -101,7 +104,7 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
           {isClassPresident &&
             'Bạn được phân quyền ghi nhận và cộng điểm cho các bạn Tổ trưởng. Các đối tượng khác sẽ do Tổ trưởng hoặc cô Hằng ghi nhận.'}
           {isTeamLeader &&
-            'Bạn chỉ được tự ghi nhận điểm cộng cho bản thân; không thể cộng điểm cho học sinh khác.'}
+            `Bạn chỉ được cộng điểm cho bản thân và thành viên chính thức thuộc ${myTeam?.name || 'tổ mình'}.`}
         </div>
       </div>
 

@@ -1398,17 +1398,18 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
       });
     }
   } else if (user.role === 'team_leader') {
-    if (!isStaffSelfAward) {
-      return res.status(403).json({ error: 'Tổ trưởng chỉ được tự ghi nhận điểm cho chính mình.' });
-    }
     if (targetStudent.teamId !== user.teamId) {
       return res.status(403).json({
-        error: 'Bạn chỉ được tự ghi nhận điểm trong hồ sơ của tổ mình.',
+        error: 'Tổ trưởng chỉ được ghi nhận điểm cho bản thân hoặc thành viên trong tổ mình.',
       });
     }
-    if (targetStudent.role !== 'team_leader') {
+    if (
+      (isStaffSelfAward && targetStudent.role !== 'team_leader') ||
+      (!isStaffSelfAward &&
+        (targetStudent.id === user.studentId || targetStudent.role !== 'student'))
+    ) {
       return res.status(403).json({
-        error: 'Tài khoản tổ trưởng chỉ được tự ghi nhận đúng hồ sơ của mình.',
+        error: 'Tổ trưởng chỉ được ghi nhận bản thân hoặc học sinh thường thuộc tổ mình.',
       });
     }
   } else {

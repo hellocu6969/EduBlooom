@@ -32,13 +32,14 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
   const isSelfAward =
     selectedStudentId === session.studentId &&
     (session.role === 'class_president' || session.role === 'team_leader');
+  const isPositiveOnly = session.role !== 'teacher';
 
   const filteredActions = useMemo(() => {
-    if (pointMode === 'positive' || isSelfAward) {
+    if (pointMode === 'positive' || isPositiveOnly || isSelfAward) {
       return actions.filter((a) => a.points > 0);
     }
     return actions.filter((a) => a.points < 0);
-  }, [actions, isSelfAward, pointMode]);
+  }, [actions, isPositiveOnly, isSelfAward, pointMode]);
 
   const [selectedActionId, setSelectedActionId] = useState<string>(
     () => actions.find((a) => a.points > 0)?.id || actions[0]?.id || ''
@@ -162,7 +163,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
                 ? session.role === 'teacher' && 'Cô Bùi Hằng ghi nhận hành động tốt cho học sinh'
                 : 'Cô Bùi Hằng phạt học sinh thực hiện chưa tốt'}
               {session.role === 'class_president' && isPositiveMode && 'Lớp trưởng ghi nhận việc tốt của tổ trưởng và bản thân'}
-              {session.role === 'team_leader' && isPositiveMode && 'Tổ trưởng chỉ tự ghi nhận điểm cho bản thân'}
+              {session.role === 'team_leader' && isPositiveMode && 'Tổ trưởng ghi nhận điểm cho bản thân và thành viên trong tổ'}
             </p>
           </div>
         </div>
@@ -227,7 +228,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
             )}
 
             {/* Chế độ ghi nhận: Cộng điểm vs Trừ điểm */}
-            {!isSelfAward && <div className="flex rounded-xl bg-slate-100 p-1 gap-1">
+            {!isPositiveOnly && !isSelfAward && <div className="flex rounded-xl bg-slate-100 p-1 gap-1">
               <button
                 type="button"
                 onClick={() => setPointMode('positive')}

@@ -17,7 +17,7 @@ Development uses `data/database.json` as its only writable data source. Firestor
 
 The `/community` page includes class challenges based on approved positive points, class events, student goals, public thank-you messages, plant gifts, activity timelines, and consecutive-day streaks. Teachers can configure a shared initial student PIN; students can sign in with their student code, change to a private 4–6 digit PIN, and manage their own goal. Student PINs are stored only as bcrypt hashes.
 
-Class presidents and team leaders can also record positive actions for themselves. These self-awards use the configured action points, are recorded in transaction history, and require a written reason. Staff cannot use this permission to deduct their own points.
+Class presidents and team leaders can record positive actions for themselves. Team leaders can also award positive actions to regular students in their own team. Self-awards use the configured action points, are recorded in transaction history, and require a written reason. Staff cannot use these permissions to deduct points.
 
 Teachers can create student-specific activity reports for a selected date range and export them as Excel or print/save them as PDF. The report API is teacher-only. The feature data is stored in JSON during local development and in the `weeklyChallenges`, `classEvents`, `studentGoals`, `studentGratitude`, and `plantRewards` Firestore collections in production.
 

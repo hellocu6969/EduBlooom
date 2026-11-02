@@ -426,7 +426,12 @@ export default function App() {
       );
     }
     if (session.role === 'team_leader') {
-      return targetStudent.id === session.studentId && targetStudent.role === 'team_leader';
+      return (
+        (targetStudent.id === session.studentId && targetStudent.role === 'team_leader') ||
+        (targetStudent.teamId === session.teamId &&
+          targetStudent.id !== session.studentId &&
+          targetStudent.role === 'student')
+      );
     }
     return false;
   };
@@ -444,7 +449,11 @@ export default function App() {
     }
     if (session.role === 'team_leader') {
       return students.filter(
-        (s) => s.id === session.studentId && s.role === 'team_leader'
+        (s) =>
+          (s.id === session.studentId && s.role === 'team_leader') ||
+          (s.teamId === session.teamId &&
+            s.id !== session.studentId &&
+            s.role === 'student')
       );
     }
     return [];
