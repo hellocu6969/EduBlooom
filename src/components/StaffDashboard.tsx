@@ -31,14 +31,15 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
 
   // Eligible students for this staff member:
   const eligibleStudents = students.filter((s) => {
-    if (s.id === session.studentId) return false; // Never award to self
+    if (s.id === session.studentId) {
+      return (
+        (isClassPresident && s.role === 'class_president') ||
+        (isTeamLeader && s.role === 'team_leader')
+      );
+    }
     if (isClassPresident) {
       // Class president can ONLY award to Team Leaders
       return s.role === 'team_leader';
-    }
-    if (isTeamLeader) {
-      // Team leader can ONLY award to regular members of OWN team
-      return s.teamId === session.teamId && s.role === 'student';
     }
     return false;
   });
@@ -80,10 +81,9 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
 
           <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
             {isClassPresident &&
-              'Hãy ghi nhận những đóng góp tích cực của các tổ trưởng nhé! Mỗi việc tốt của bạn là động lực cho toàn lớp.'}
+              'Hãy ghi nhận những đóng góp tích cực của các tổ trưởng và của chính mình nhé!'}
             {isTeamLeader &&
-              `Hãy ghi nhận những việc tốt của các thành viên trong ${myTeam?.name ? myTeam.name.split('(')[0].trim() : 'tổ'} nhé!`}{' '}
-            (Bạn không thể tự cộng điểm cho mình).
+              'Bạn chỉ có thể tự ghi nhận điểm cho chính mình.'}
           </p>
         </div>
 
@@ -101,7 +101,7 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
           {isClassPresident &&
             'Bạn được phân quyền ghi nhận và cộng điểm cho các bạn Tổ trưởng. Các đối tượng khác sẽ do Tổ trưởng hoặc cô Hằng ghi nhận.'}
           {isTeamLeader &&
-            `Bạn được phân quyền ghi nhận việc tốt cho các thành viên chính thức thuộc ${myTeam?.name || 'tổ mình'}.`}
+            'Bạn chỉ được tự ghi nhận điểm cộng cho bản thân; không thể cộng điểm cho học sinh khác.'}
         </div>
       </div>
 
@@ -110,14 +110,14 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
             <Sprout className="w-4 h-4 text-emerald-600" />
-            <span>Học sinh trong phạm vi bạn có thể cộng điểm ({eligibleStudents.length})</span>
+            <span>Đối tượng bạn có thể ghi nhận điểm ({eligibleStudents.length})</span>
           </h3>
-          <span className="text-[11px] text-slate-400">Chọn học sinh để gieo mầm ngay</span>
+          <span className="text-[11px] text-slate-400">Chọn người để gieo mầm ngay</span>
         </div>
 
         {eligibleStudents.length === 0 ? (
           <div className="p-6 text-center bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500">
-            Hiện không có học sinh nào khả dụng trong phạm vi quản lý của bạn.
+            Hiện không có ai khả dụng trong phạm vi quản lý của bạn.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -134,7 +134,7 @@ export const StaffDashboard: React.FC<StaffDashboardProps> = ({
                     <PlantIllustration level={stage.level} className="w-12 h-12 shrink-0" />
                     <div>
                       <div className="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-emerald-700 transition">
-                        {std.name}
+                        {std.name}{std.id === session.studentId ? ' (Bạn)' : ''}
                       </div>
                       <div className="text-[11px] text-slate-500">
                         {std.code} · {tm?.name ? tm.name.split('(')[0].trim() : 'Tổ'}

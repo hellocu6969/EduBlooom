@@ -76,13 +76,17 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     if (!session) return false;
     if (session.role === 'teacher') return true;
     if (session.role === 'class_president') {
-      return student.role === 'team_leader' && student.id !== session.studentId;
+      return (
+        (student.id === session.studentId && student.role === 'class_president') ||
+        (student.id !== session.studentId && student.role === 'team_leader')
+      );
     }
     if (session.role === 'team_leader') {
       return (
-        student.teamId === session.teamId &&
-        student.id !== session.studentId &&
-        student.role === 'student'
+        (student.id === session.studentId && student.role === 'team_leader') ||
+        (student.teamId === session.teamId &&
+          student.id !== session.studentId &&
+          student.role === 'student')
       );
     }
     return false;

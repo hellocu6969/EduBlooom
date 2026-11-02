@@ -420,14 +420,13 @@ export default function App() {
     if (!session) return false;
     if (session.role === 'teacher') return true;
     if (session.role === 'class_president') {
-      return targetStudent.role === 'team_leader' && targetStudent.id !== session.studentId;
+      return (
+        (targetStudent.id === session.studentId && targetStudent.role === 'class_president') ||
+        (targetStudent.id !== session.studentId && targetStudent.role === 'team_leader')
+      );
     }
     if (session.role === 'team_leader') {
-      return (
-        targetStudent.teamId === session.teamId &&
-        targetStudent.id !== session.studentId &&
-        targetStudent.role === 'student'
-      );
+      return targetStudent.id === session.studentId && targetStudent.role === 'team_leader';
     }
     return false;
   };
@@ -437,11 +436,15 @@ export default function App() {
     if (!session) return [];
     if (session.role === 'teacher') return students;
     if (session.role === 'class_president') {
-      return students.filter((s) => s.role === 'team_leader' && s.id !== session.studentId);
+      return students.filter(
+        (s) =>
+          (s.id === session.studentId && s.role === 'class_president') ||
+          (s.id !== session.studentId && s.role === 'team_leader')
+      );
     }
     if (session.role === 'team_leader') {
       return students.filter(
-        (s) => s.teamId === session.teamId && s.id !== session.studentId && s.role === 'student'
+        (s) => s.id === session.studentId && s.role === 'team_leader'
       );
     }
     return [];

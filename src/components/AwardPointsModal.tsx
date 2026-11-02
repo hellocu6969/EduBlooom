@@ -29,13 +29,16 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
   const [selectedStudentId, setSelectedStudentId] = useState<string>(
     initialStudent ? initialStudent.id : eligibleStudents[0]?.id || ''
   );
+  const isSelfAward =
+    selectedStudentId === session.studentId &&
+    (session.role === 'class_president' || session.role === 'team_leader');
 
   const filteredActions = useMemo(() => {
-    if (pointMode === 'positive') {
+    if (pointMode === 'positive' || isSelfAward) {
       return actions.filter((a) => a.points > 0);
     }
     return actions.filter((a) => a.points < 0);
-  }, [actions, pointMode]);
+  }, [actions, isSelfAward, pointMode]);
 
   const [selectedActionId, setSelectedActionId] = useState<string>(
     () => actions.find((a) => a.points > 0)?.id || actions[0]?.id || ''
@@ -46,7 +49,11 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
     if (filteredActions.length > 0) {
       setSelectedActionId(filteredActions[0].id);
     }
-  }, [pointMode]);
+  }, [filteredActions]);
+
+  useEffect(() => {
+    if (isSelfAward) setPointMode('positive');
+  }, [isSelfAward]);
 
   const [note, setNote] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -67,6 +74,10 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
     e.preventDefault();
     if (!selectedStudentId || !selectedActionId) {
       setErrorMsg('Vui lòng chọn học sinh và nội dung ghi nhận.');
+      return;
+    }
+    if (isSelfAward && !note.trim()) {
+      setErrorMsg('Vui lòng ghi lý do khi tự ghi nhận điểm cho mình.');
       return;
     }
 
@@ -150,8 +161,8 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
               {isPositiveMode
                 ? session.role === 'teacher' && 'Cô Bùi Hằng ghi nhận hành động tốt cho học sinh'
                 : 'Cô Bùi Hằng phạt học sinh thực hiện chưa tốt'}
-              {session.role === 'class_president' && isPositiveMode && 'Lớp trưởng ghi nhận nỗ lực của các tổ trưởng'}
-              {session.role === 'team_leader' && isPositiveMode && 'Tổ trưởng ghi nhận việc tốt của thành viên trong tổ'}
+              {session.role === 'class_president' && isPositiveMode && 'Lớp trưởng ghi nhận việc tốt của tổ trưởng và bản thân'}
+              {session.role === 'team_leader' && isPositiveMode && 'Tổ trưởng chỉ tự ghi nhận điểm cho bản thân'}
             </p>
           </div>
         </div>
@@ -216,7 +227,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
             )}
 
             {/* Chế độ ghi nhận: Cộng điểm vs Trừ điểm */}
-            <div className="flex rounded-xl bg-slate-100 p-1 gap-1">
+            {!isSelfAward && <div className="flex rounded-xl bg-slate-100 p-1 gap-1">
               <button
                 type="button"
                 onClick={() => setPointMode('positive')}
@@ -239,7 +250,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
               >
                 <span>⚠️ Nhắc nhở nỗ lực (-)</span>
               </button>
-            </div>
+            </div>}
 
             {/* Bước 1: Chọn Học Sinh */}
             <div>
@@ -261,6 +272,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
                     return (
                       <option key={s.id} value={s.id}>
                         {s.code} - {s.name} ({t?.name ? t.name.split('(')[0].trim() : 'Tổ'}) - Hiện có {s.totalPoints} đ
+                        {s.id === session.studentId ? ' (Bạn)' : ''}
                         {s.role === 'team_leader' ? ' [Tổ trưởng]' : ''}
                       </option>
                     );
@@ -352,13 +364,18 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
             {/* Ghi chú thêm */}
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">
-                Ghi chú cụ thể (không bắt buộc):
+                {isSelfAward ? 'Lý do tự ghi nhận điểm (bắt buộc):' : 'Ghi chú cụ thể (không bắt buộc):'}
               </label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Ví dụ: Giúp bạn Minh bài tập Toán hình; trực nhật chu đáo..."
+                required={isSelfAward}
+                placeholder={
+                  isSelfAward
+                    ? 'Nhập lý do tự ghi nhận điểm...'
+                    : 'Ví dụ: Giúp bạn Minh bài tập Toán hình; trực nhật chu đáo...'
+                }
                 className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"
               />
             </div>

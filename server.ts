@@ -1328,6 +1328,7 @@ const recentAwardLocks = new Set<string>();
 app.post('/api/transactions/award', authenticate, async (req: Request, res: Response) => {
   const user = (req as any).user as SessionInfo;
   const { studentId, studentCode, actionId, note, idempotencyKey } = req.body;
+  const normalizedNote = typeof note === 'string' ? note.trim() : '';
 
   if (
     typeof studentId !== 'string' ||
@@ -1371,37 +1372,43 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
     return res.status(403).json({ error: 'Chỉ giáo viên mới được ghi nhận thao tác trừ điểm.' });
   }
 
+  const isStaffSelfAward =
+    targetStudent.id === user.studentId &&
+    (user.role === 'class_president' || user.role === 'team_leader');
+  if (isStaffSelfAward && action.points <= 0) {
+    return res.status(403).json({ error: 'Chỉ được tự ghi nhận hành động có điểm cộng.' });
+  }
+  if (isStaffSelfAward && !normalizedNote) {
+    return res.status(400).json({ error: 'Vui lòng nhập lý do khi tự ghi nhận điểm.' });
+  }
+
   const targetTeam = db.teams.find((t: any) => t.id === targetStudent.teamId);
 
   // STRICT SERVER ROLE PERMISSIONS MATRIX:
   if (user.role === 'teacher') {
     // Teacher has full authority for all students
   } else if (user.role === 'class_president') {
-    // 1. Cannot award to self
-    if (user.studentId === targetStudent.id) {
-      return res.status(403).json({ error: 'Lớp trưởng không được tự cộng điểm cho chính mình.' });
-    }
-    // 2. Can ONLY award to students holding 'team_leader' role
-    if (targetStudent.role !== 'team_leader') {
+    if (isStaffSelfAward) {
+      if (targetStudent.role !== 'class_president') {
+        return res.status(403).json({ error: 'Tài khoản lớp trưởng chỉ được tự ghi nhận đúng hồ sơ của mình.' });
+      }
+    } else if (targetStudent.role !== 'team_leader') {
       return res.status(403).json({
         error: 'Lớp trưởng chỉ được cộng điểm cho các tổ trưởng hợp lệ. Vui lòng chọn tổ trưởng.',
       });
     }
   } else if (user.role === 'team_leader') {
-    // 1. Cannot award to self
-    if (user.studentId === targetStudent.id) {
-      return res.status(403).json({ error: 'Tổ trưởng không được tự cộng điểm cho chính mình.' });
+    if (!isStaffSelfAward) {
+      return res.status(403).json({ error: 'Tổ trưởng chỉ được tự ghi nhận điểm cho chính mình.' });
     }
-    // 2. Must belong to own team
     if (targetStudent.teamId !== user.teamId) {
       return res.status(403).json({
-        error: 'Bạn chỉ được cộng điểm cho các thành viên hợp lệ thuộc tổ mình.',
+        error: 'Bạn chỉ được tự ghi nhận điểm trong hồ sơ của tổ mình.',
       });
     }
-    // 3. Must be regular student, cannot award other team leader
-    if (targetStudent.role !== 'student') {
+    if (targetStudent.role !== 'team_leader') {
       return res.status(403).json({
-        error: 'Tổ trưởng chỉ được cộng điểm cho các tổ viên thường thuộc tổ mình.',
+        error: 'Tài khoản tổ trưởng chỉ được tự ghi nhận đúng hồ sơ của mình.',
       });
     }
   } else {
@@ -1428,7 +1435,7 @@ app.post('/api/transactions/award', authenticate, async (req: Request, res: Resp
     actionId: action.id,
     actionName: action.name,
     points: action.points,
-    note: note ? String(note).trim() : '',
+    note: normalizedNote,
     status,
     approvedByRole: user.role === 'teacher' ? 'teacher' : undefined,
     createdAt: new Date().toISOString(),
